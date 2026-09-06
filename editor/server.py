@@ -9,7 +9,7 @@ import sys, subprocess
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0,str(ROOT))
-from direction import suggest, validate_direction
+from direction import suggest, validate_direction, EXPRESSIONS, POSES
 STORE = HERE / 'workspace'
 LOCK = threading.RLock()
 TOKEN = secrets.token_urlsafe(32)
@@ -150,6 +150,12 @@ class Handler(BaseHTTPRequestHandler):
         if not self.valid_host():return self.send(403,{'error':'localhostから開いてください。'})
         path=urlparse(self.path).path
         try:
+            if path.startswith('/sprites/'):
+                allowed={f'/sprites/{e}-{p}.png' for e in EXPRESSIONS for p in POSES}
+                if path not in allowed:return self.send(404,{'error':'差分が見つかりません。'})
+                target=ROOT/'assets'/'previews'/path.rsplit('/',1)[-1]
+                if not target.exists():return self.send(404,{'error':'python build_sprite_previews.py を実行してください。'})
+                return self.send(200,target.read_bytes(),'image/png')
             if path.startswith('/api/preview/'):
                 identifier=path.rsplit('/',1)[-1];project_path(identifier)
                 with LOCK:job=copy.deepcopy(JOBS.get(identifier))

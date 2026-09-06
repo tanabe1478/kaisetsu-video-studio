@@ -32,7 +32,7 @@ test('wording synchronizes narration, undo/redo restores pronunciation, metadata
  const x=await setup(t);x.input('[data-field="line-text"]','<img src=x onerror=alert(1)>改訂');
  assert.equal(x.current().chapters[0].scenes[0].lines[0].speech,'<img src=x onerror=alert(1)>改訂');
  x.click('#undo');assert.equal(x.$('[data-field="line-speech"]').value,'かたの説明');
- x.click('#redo');assert.equal(x.$('#editor img'),null);
+ x.click('#redo');assert.equal(x.$('#editor img[onerror]'),null);
  await x.flush();assert.equal(x.state.saved.chapters[0].scenes[0].lines[0].custom,42);
  x.click('#export');await new Promise(r=>setTimeout(r,20));assert.equal(x.state.exported.meta.bgm.path,'music.mp3');assert.match(x.$('#handoff-text').value,/C:\/exports\/test/);
 });
@@ -63,4 +63,19 @@ test('manual delivery is saved and invalid numeric edits are rejected',async t=>
  assert.equal(line().direction.source,'manual');assert.equal(line().direction.speed,.9);
  x.input('[data-delivery="speed"]','20');assert.equal(line().direction.speed,.9);
  await x.flush();assert.equal(x.state.saved.chapters[0].scenes[0].lines[0].direction.expression,'thinking');
+});
+
+test('sprite preview follows line overrides and scene inheritance',async t=>{
+ const x=await setup(t);
+ assert.match(x.$('.delivery img').src,/normal-normal.png$/);
+ x.input('[data-field="scene-expression"]','happy','change');
+ assert.match(x.$('.delivery img').src,/happy-normal.png$/);
+ x.input('[data-delivery="pose"]','think','change');
+ assert.match(x.$('.delivery img').src,/happy-think.png$/);
+ x.input('[data-field="scene-expression"]','surprised','change');
+ assert.match(x.$('.delivery img').src,/surprised-think.png$/);
+ x.input('[data-delivery="expression"]','thinking','change');
+ x.input('[data-field="scene-expression"]','happy','change');
+ assert.match(x.$('.delivery img').src,/thinking-think.png$/);
+ assert.match(x.$('.settings img').src,/happy-normal.png$/);
 });
