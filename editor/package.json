@@ -1,0 +1,1 @@
+{"name":"kaisetsu-outline-tests","private":true,"type":"module","scripts":{"test":"node --test test_editor.mjs","check":"node --check static/app.js"},"devDependencies":{"jsdom":"26.1.0"}}

@@ -5,3 +5,5 @@ __pycache__/
 _build/
 target/
 .mooncakes/
+editor/workspace/
+editor/node_modules/
