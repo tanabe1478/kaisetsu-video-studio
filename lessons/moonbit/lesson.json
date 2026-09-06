@@ -861,5 +861,12 @@
         "音声：VOICEVOX:ずんだもん"
       ]
     }
-  ]
+  ],
+  "bgm": {
+    "path": "assets/bgm/honwaka-puppu.mp3",
+    "title": "ほんわかぷっぷー",
+    "creator": "もっぴーさうんど",
+    "source": "https://dova-s.jp/bgm/detail/1854",
+    "below_voice_db": 22
+  }
 }

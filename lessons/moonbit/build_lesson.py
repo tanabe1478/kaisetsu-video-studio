@@ -184,6 +184,7 @@ add('09 まとめと学習資料','次は自分で値を変えてみる',[
 '台本、出典、検証記録はリポジトリに残すのだ。ずんだもんと学ぶMoonBit入門は、ここまでなのだ。'],points=['公式：docs.moonbitlang.com','台本・コード例・出典を同梱','音声：VOICEVOX:ずんだもん'],expression='happy',pose='wave')
 
 project={'title':'MoonBit 言語仕様入門','series':'KAISETSU VIDEO STUDIO  /  MOONBIT 0.10.11','speaker':'ずんだもん','style':'ノーマル','speed':1.02,'scenes':scenes}
+project['bgm']={'path':'assets/bgm/honwaka-puppu.mp3','title':'ほんわかぷっぷー','creator':'もっぴーさうんど','source':'https://dova-s.jp/bgm/detail/1854','below_voice_db':22}
 (ROOT/'lesson.json').write_text(json.dumps(project,ensure_ascii=False,indent=2),encoding='utf-8')
 transcript=['# MoonBit 言語仕様入門\n','2026-09-06 / 対象コンパイラー: moonc v0.10.11\n']
 for i,s in enumerate(scenes,1):

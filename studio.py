@@ -7,6 +7,7 @@ import requests
 import imageio_ffmpeg
 from PIL import Image, ImageDraw, ImageFont
 from psd_tools import PSDImage
+from audio_mix import prepare_audio
 
 ROOT = Path(__file__).resolve().parent
 W, H, FPS = 1280, 720, 24
@@ -169,10 +170,11 @@ def render(project, base, out):
         if len(wrap(s['heading'],font(31),715))>2:raise ValueError('Heading too long')
     out.mkdir(parents=True,exist_ok=True)
     timing,pcm,rate=synthesize(project,base,out)
+    audio_path=prepare_audio(project,ROOT,out)
     print('Preparing PSD expressions...',flush=True);images=sprites(project['scenes'])
     ffmpeg=imageio_ffmpeg.get_ffmpeg_exe()
     command=[ffmpeg,'-y','-f','rawvideo','-vcodec','rawvideo','-pix_fmt','rgb24','-s',f'{W}x{H}','-r',str(FPS),'-i','-',
-             '-i',str(out/'narration.wav'),'-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-shortest','-movflags','+faststart',str(out/'demo.mp4')]
+             '-i',str(audio_path),'-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-shortest','-movflags','+faststart',str(out/'demo.mp4')]
     subtitles=[]
     with (out/'render.log').open('w',encoding='utf-8') as log:
         proc=subprocess.Popen(command,stdin=subprocess.PIPE,stderr=log)
@@ -187,7 +189,7 @@ def render(project, base, out):
                     speaking=bool(len(sample) and np.sqrt(np.mean(sample**2))>450)
                     mouth=speaking and n%6<4;blink=(t+i*.71)%3.4>3.24
                     im=bg.copy();sprite=images[scene['expression'],scene['pose'],blink,mouth]
-                    im.paste(sprite,(830,108-int(2*math.sin(t*3))),sprite)
+                    im.paste(sprite,(830,108),sprite)
                     d=ImageDraw.Draw(im);d.rounded_rectangle((48,548,1232,678),radius=20,fill='#203b2a')
                     caption=next((c['text'] for c in captions if c['start']<=t<c['end']),'')
                     lines=caption_lines(caption)

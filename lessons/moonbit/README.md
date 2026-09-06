@@ -6,6 +6,7 @@
 - [台本](TRANSCRIPT.md)
 - [出典と検証環境](SOURCES.md)
 - [実行検証記録](VALIDATION.json)
+- [BGM・配置調整と音源の準備](BGM.md)
 - `lesson.json`: 動画生成の入力
 - `build_lesson.py`: 台本・読み上げ表記・コード例の編集元
 - `examples/*.mbtx`: 場面番号に対応する独立実行用コード
@@ -17,6 +18,7 @@
 ## 再生成
 
 リポジトリのルートで以下を実行します。動画生成にはVOICEVOXと立ち絵が必要です。
+BGM「ほんわかぷっぷー」も配布元から手動で取得し、`assets/bgm/honwaka-puppu.mp3` に配置してください。
 
 ```powershell
 python lessons/moonbit/build_lesson.py
@@ -53,5 +55,6 @@ python lessons/moonbit/verify_examples.py
 - 表示する英語表記と、音声用のカタカナ表記を分離。
 - 小問のあとに考える間を挿入。
 - 章一覧とMP4章メタデータを出力。
+- 立ち絵を固定位置に配置。BGMを小音量で追加。
 
 口パクは音量ベースの2段階です。音素別の口形には未対応です。
