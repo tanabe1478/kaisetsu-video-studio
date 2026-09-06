@@ -1,4 +1,5 @@
 const $=s=>document.querySelector(s);
+const lengthPresets={short:5,standard:10,long:20};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const id=()=>crypto.randomUUID().replaceAll('-','');
 const clone=x=>structuredClone(x);
@@ -45,7 +46,7 @@ function options(values,currentValue){return values.map(([v,t])=>`<option value=
 function renderEditor(){
  $('#empty').hidden=!!p;$('#editor').hidden=!p;if(!p)return;
  if(selected.type==='project'){
-  $('#editor').innerHTML=`<div class="eyebrow">DOCUMENT</div><h2>台本全体の設定</h2><section class="duration-panel"><h3>動画の長さ</h3><label>目標時間（分・0は指定なし）<input type="number" min="0" max="120" step="0.5" data-field="project-targetMinutes" value="${p.meta.targetMinutes??0}"></label><p id="duration-detail">計算中…</p><button data-action="duration-request">目標に合わせた改訂をAIに依頼</button><small>目標の指定だけでは台本や動画は変わりません。内容の増減をAIに依頼します。</small></section><div class="project-fields"><label>タイトル<input data-field="project-title" value="${esc(p.meta.title)}"></label><label>シリーズ表記<input data-field="project-series" value="${esc(p.meta.series||'')}"></label><div class="settings-grid"><label>話者<input data-field="project-speaker" value="${esc(p.meta.speaker||'ずんだもん')}"></label><label>スタイル<input data-field="project-style" value="${esc(p.meta.style||'ノーマル')}"></label><label>話速<input type="number" min="0.5" max="2" step="0.01" data-field="project-speed" value="${p.meta.speed||1}"></label></div></div><p class="hint">BGMなど、元の台本のその他の設定も書き出し時に保持します。</p><div class="section-label"><h3>章の一覧</h3><button data-action="auto-all">全編の演出を自動提案</button><button data-action="add-chapter">＋ 章を追加</button></div>${p.chapters.map((c,i)=>`<div class="chapter-card"><span class="index">${i+1}</span><div class="card-title" data-select-chapter="${c.id}">${esc(c.title)}<small>${c.scenes.length}場面</small></div><button data-chapter-up="${c.id}" aria-label="章を上へ" ${i===0?'disabled':''}>↑</button><button data-chapter-down="${c.id}" aria-label="章を下へ" ${i===p.chapters.length-1?'disabled':''}>↓</button></div>`).join('')}`;return;
+  $('#editor').innerHTML=`<div class="eyebrow">DOCUMENT</div><h2>台本全体の設定</h2><section class="duration-panel"><h3>動画の長さ</h3>${lengthControls('project',p.meta.targetMinutes??0,p.meta.targetLength)}<p id="duration-detail">計算中…</p><button data-action="duration-request">目標に合わせた改訂をAIに依頼</button><small>目標の指定だけでは台本や動画は変わりません。内容の増減をAIに依頼します。</small></section><div class="project-fields"><label>タイトル<input data-field="project-title" value="${esc(p.meta.title)}"></label><label>シリーズ表記<input data-field="project-series" value="${esc(p.meta.series||'')}"></label><div class="settings-grid"><label>話者<input data-field="project-speaker" value="${esc(p.meta.speaker||'ずんだもん')}"></label><label>スタイル<input data-field="project-style" value="${esc(p.meta.style||'ノーマル')}"></label><label>話速<input type="number" min="0.5" max="2" step="0.01" data-field="project-speed" value="${p.meta.speed||1}"></label></div></div><p class="hint">BGMなど、元の台本のその他の設定も書き出し時に保持します。</p><div class="section-label"><h3>章の一覧</h3><button data-action="auto-all">全編の演出を自動提案</button><button data-action="add-chapter">＋ 章を追加</button></div>${p.chapters.map((c,i)=>`<div class="chapter-card"><span class="index">${i+1}</span><div class="card-title" data-select-chapter="${c.id}">${esc(c.title)}<small>${c.scenes.length}場面</small></div><button data-chapter-up="${c.id}" aria-label="章を上へ" ${i===0?'disabled':''}>↑</button><button data-chapter-down="${c.id}" aria-label="章を下へ" ${i===p.chapters.length-1?'disabled':''}>↓</button></div>`).join('')}`;return;
  }
  if(selected.type==='chapter'){
   const c=p.chapters.find(x=>x.id===selected.id),index=p.chapters.indexOf(c);
@@ -134,6 +135,14 @@ document.addEventListener('input',e=>{
  },key);
 });
 document.addEventListener('change',e=>{
+ if(e.target.dataset.lengthScope){
+ const scope=e.target.dataset.lengthScope,mode=e.target.value,root=e.target.closest('.length-control'),input=root.querySelector('input');
+ root.querySelector('.custom-minutes').hidden=mode!=='custom';
+ if(mode!=='custom')input.value=lengthPresets[mode];
+ if(scope==='project'){mutate(()=>{p.meta.targetLength=mode;p.meta.targetMinutes=Number(input.value);});}
+ else input.dispatchEvent(new Event('input',{bubbles:true}));
+ return;
+ }
  if(e.target.dataset.delivery&&e.target.tagName==='SELECT'){editDelivery(e.target);return;}
  const field=e.target.dataset.field;if(!field||!p||e.target.tagName!=='SELECT')return;
  if(field==='scene-chapter'){const {c,s}=current(),dest=p.chapters.find(x=>x.id===e.target.value);if(dest===c)return;mutate(()=>{c.scenes=c.scenes.filter(x=>x.id!==s.id);dest.scenes.push(s);collapsed.delete(dest.id);});}
@@ -173,11 +182,16 @@ $('#repository-copy').onclick=async()=>{try{await navigator.clipboard.writeText(
 function clockText(seconds){const n=Math.round(seconds);return `${Math.floor(n/60)}分${String(n%60).padStart(2,'0')}秒`;}
 function scheduleDuration(){clearTimeout(durationTimer);if(!p)return;durationTimer=setTimeout(async()=>{const projectId=p.id,ticket=generation;try{const r=await api('/api/duration',{project:clone(p)});if(p.id!==projectId||ticket!==generation)return;durationResult=r;const detail=$('#duration-detail');if(detail){let text=`現在：${clockText(r.seconds)}（${r.exact?'全セリフの合成済み音声から計算':'推定 '+clockText(r.lowerSeconds)+'〜'+clockText(r.upperSeconds)}）`;if(r.targetSeconds){const diff=r.seconds-r.targetSeconds;text+=`。目標：${clockText(r.targetSeconds)}。${diff>0?'約'+clockText(diff)+'短く':'約'+clockText(-diff)+'長く'}する目安です。`;if(r.suggestedCharacters!==null)text+=` 同程度の話速・間なら字幕約${r.suggestedCharacters.toLocaleString()}文字が目安です。`;}detail.textContent=text;}$('#stats').textContent+=` / 約${clockText(r.seconds)}`;}catch{if($('#duration-detail'))$('#duration-detail').textContent='時間を取得できません。接続を確認してください。';}},400);}
 let briefTimer=null,briefSaving=Promise.resolve(),briefVersion=0;
-function briefValue(){const b={};document.querySelectorAll('[data-brief]').forEach(el=>b[el.dataset.brief]=el.type==='checkbox'?el.checked:el.type==='number'?Number(el.value):el.value);return b;}
+function briefValue(){const b={};document.querySelectorAll('[data-brief]').forEach(el=>b[el.dataset.brief]=el.type==='checkbox'?el.checked:el.type==='number'?Number(el.value):el.value);b.targetLength=$('[data-length-scope="brief"]').value;return b;}
 function briefError(e){$('#brief-error').hidden=false;$('#brief-error').textContent=e.message||String(e);}
 function saveBrief(){clearTimeout(briefTimer);const data=briefValue(),version=briefVersion;briefSaving=briefSaving.catch(()=>{}).then(()=>api('/api/brief',{brief:data})).then(()=>{if(version===briefVersion){briefDirty=false;$('#brief-save-status').textContent='制作条件を保存しました';}});return briefSaving;}
-$('#open-brief').onclick=async()=>{try{await briefSaving;const b=await api('/api/brief');document.querySelectorAll('[data-brief]').forEach(el=>{if(el.type==='checkbox')el.checked=b[el.dataset.brief]??true;else el.value=b[el.dataset.brief]??(el.type==='number'?0:'');});$('#brief-result').hidden=true;$('#brief-error').hidden=true;$('#brief-dialog').showModal();}catch(e){error(e);}};
+$('#open-brief').onclick=async()=>{try{await briefSaving;const b=await api('/api/brief');$('#brief-length').innerHTML=lengthControls('brief',b.targetMinutes??10,b.targetLength);document.querySelectorAll('[data-brief]').forEach(el=>{if(el.type==='checkbox')el.checked=b[el.dataset.brief]??true;else el.value=b[el.dataset.brief]??(el.type==='number'?10:'');});$('#brief-result').hidden=true;$('#brief-error').hidden=true;$('#brief-dialog').showModal();}catch(e){error(e);}};
 document.addEventListener('input',e=>{if(!e.target.dataset.brief)return;briefDirty=true;briefVersion++;$('#brief-result').hidden=true;$('#brief-error').hidden=true;$('#brief-save-status').textContent='保存待ち…';clearTimeout(briefTimer);briefTimer=setTimeout(()=>saveBrief().catch(briefError),650);});
 $('#brief-generate').onclick=async()=>{try{const version=briefVersion;await saveBrief();const r=await api('/api/brief/export',{brief:briefValue()});if(version!==briefVersion)throw Error('入力が変わりました。もう一度依頼を作ってください。');$('#brief-prompt').value=r.prompt+'\n\n制作条件の保存先：'+r.directory;$('#brief-result').hidden=false;$('#brief-error').hidden=true;}catch(e){briefError(e);}};
 $('#brief-copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#brief-prompt').value);toast('事前プロンプトをコピーしました');}catch{$('#brief-prompt').select();}};
 $('#brief-dialog').addEventListener('close',()=>{if(briefTimer)saveBrief().catch(error);});
+
+function lengthControls(scope,minutes,mode){
+ if(mode!=='custom'&&lengthPresets[mode]!==minutes)mode=Object.keys(lengthPresets).find(k=>lengthPresets[k]===minutes)||'custom';
+ return `<div class="length-control"><label>動画の長さ<select data-length-scope="${scope}">${options([['short','短め（5分）'],['standard','標準（10分）'],['long','長め（20分）'],['custom','カスタム']],mode)}</select></label><label class="custom-minutes" ${mode==='custom'?'':'hidden'}>目標時間（分・0は指定なし）<input type="number" min="0" max="120" step="0.5" ${scope==='brief'?'data-brief="targetMinutes"':'data-field="project-targetMinutes"'} value="${Number(minutes)}"></label></div>`;
+}

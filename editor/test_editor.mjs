@@ -93,7 +93,7 @@ test('repository references are pinned and a URL produces a ChatGPT request',asy
 
 test('brief conditions survive reopening and generate a request',async t=>{
  const x=await setup(t);x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
- x.input('[data-brief="topic"]','同期の仕組み');x.input('[data-brief="targetMinutes"]','5');x.input('[data-brief="structure"]','導入、例、まとめ');
+ x.input('[data-brief="topic"]','同期の仕組み');x.input('[data-length-scope="brief"]','short','change');x.input('[data-brief="structure"]','導入、例、まとめ');
  x.click('#brief-generate');await new Promise(r=>setTimeout(r,20));
  assert.equal(x.state.brief.targetMinutes,5);assert.equal(x.state.brief.outlineFirst,true);
  assert.match(x.$('#brief-prompt').value,/同期の仕組み 5分/);assert.equal(x.$('#brief-result').hidden,false);
@@ -105,4 +105,30 @@ test('target duration is saved and included in revision handoff',async t=>{
  await new Promise(r=>setTimeout(r,450));assert.match(x.$('#duration-detail').textContent,/12分05秒/);
  x.click('[data-action="duration-request"]');await new Promise(r=>setTimeout(r,20));
  assert.equal(x.state.exported.meta.targetMinutes,5);assert.match(x.$('#handoff-text').value,/目標は5分/);
+});
+
+test('four length options retain custom selection and drive the exported target',async t=>{
+ const x=await setup(t);x.click('[data-select-project]');
+ assert.equal(x.$('[data-length-scope="project"]').options.length,4);
+ assert.equal(x.$('[data-length-scope="project"]').value,'custom');
+ for(const [mode,minutes] of [['short',5],['standard',10],['long',20]]){
+  x.input('[data-length-scope="project"]',mode,'change');
+  assert.equal(x.current().meta.targetMinutes,minutes);assert.equal(x.$('.custom-minutes').hidden,true);
+ }
+ x.input('[data-length-scope="project"]','custom','change');
+ assert.equal(x.$('.custom-minutes').hidden,false);
+ x.input('[data-field="project-targetMinutes"]','7.5');await x.flush();
+ x.click('[data-select-project]');assert.equal(x.$('[data-field="project-targetMinutes"]').value,'7.5');
+ x.click('[data-action="duration-request"]');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.state.exported.meta.targetMinutes,7.5);
+ assert.match(x.$('#handoff-text').value,/目標は7.5分/);
+});
+test('custom brief minutes and mode survive reopening even at a preset duration',async t=>{
+ const x=await setup(t);x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.$('[data-length-scope="brief"]').value,'standard');
+ x.input('[data-length-scope="brief"]','custom','change');x.input('[data-brief="targetMinutes"]','5');
+ x.input('[data-brief="topic"]','テスト');x.click('#brief-generate');await new Promise(r=>setTimeout(r,20));
+ x.click('[data-close="brief-dialog"]');x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.$('[data-length-scope="brief"]').value,'custom');assert.equal(x.$('[data-brief="targetMinutes"]').value,'5');
+ assert.equal(x.$('#brief-length .custom-minutes').hidden,false);
 });
