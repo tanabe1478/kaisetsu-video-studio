@@ -1,0 +1,16 @@
+{
+  "duration_seconds": 725.4583333333334,
+  "scenes": 25,
+  "chapters": 8,
+  "captions": 99,
+  "bytes": 27276878,
+  "full_av_decode": "passed",
+  "timeline": "passed",
+  "embedded_chapters": "passed",
+  "audio_listening_review": "not performed",
+  "contact_sheet_review": "passed",
+  "source_commit": "45dc91e78e03300b69cc088057a28c42cee35a41",
+  "editor_project": "7a694922679a4842809b368bcfa3c52c",
+  "editor_revision": 0,
+  "output_directory": "linear-sync-20260906-155154"
+}
