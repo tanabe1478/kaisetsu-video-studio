@@ -1,0 +1,5 @@
+fn main {
+  let n = 5
+  let answer = if n > 3 { n * 2 } else { n + 2 }
+  println(answer)
+}

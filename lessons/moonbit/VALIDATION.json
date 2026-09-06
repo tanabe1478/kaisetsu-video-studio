@@ -1,0 +1,157 @@
+[
+  {
+    "example": "03.mbtx",
+    "passed": true,
+    "stdout": "Hello, MoonBit!",
+    "diagnostics": ""
+  },
+  {
+    "example": "04.mbtx",
+    "passed": true,
+    "stdout": "54",
+    "diagnostics": ""
+  },
+  {
+    "example": "05.mbtx",
+    "passed": true,
+    "stdout": "4",
+    "diagnostics": ""
+  },
+  {
+    "example": "06.mbtx",
+    "passed": true,
+    "stdout": "8.5\ntrue\nscore",
+    "diagnostics": ""
+  },
+  {
+    "example": "07.mbtx",
+    "passed": true,
+    "stdout": "score = 9\n9",
+    "diagnostics": ""
+  },
+  {
+    "example": "08.mbtx",
+    "passed": true,
+    "stdout": "13",
+    "diagnostics": ""
+  },
+  {
+    "example": "09.mbtx",
+    "passed": true,
+    "stdout": "warm",
+    "diagnostics": ""
+  },
+  {
+    "example": "10.mbtx",
+    "passed": true,
+    "stdout": "10",
+    "diagnostics": ""
+  },
+  {
+    "example": "12.mbtx",
+    "passed": true,
+    "stdout": "6",
+    "diagnostics": ""
+  },
+  {
+    "example": "13.mbtx",
+    "passed": true,
+    "stdout": "9\n4",
+    "diagnostics": ""
+  },
+  {
+    "example": "14.mbtx",
+    "passed": true,
+    "stdout": "10\n5",
+    "diagnostics": ""
+  },
+  {
+    "example": "15.mbtx",
+    "passed": true,
+    "stdout": "12",
+    "diagnostics": "Warning: [0007]\n   ╭─[ <lesson>\\examples\\15.mbtx:2:3 ]\n   │\n 2 │   name : String\n   │   ──┬─  \n   │     ╰─── Warning (unused_field): Field 'name' is never read\n───╯\n"
+  },
+  {
+    "example": "16.mbtx",
+    "passed": true,
+    "stdout": "2",
+    "diagnostics": ""
+  },
+  {
+    "example": "17.mbtx",
+    "passed": true,
+    "stdout": "",
+    "diagnostics": "Warning: [0006]\n   ╭─[ <lesson>\\examples\\17.mbtx:2:3 ]\n   │\n 2 │   Idle\n   │   ──┬─  \n   │     ╰─── Warning (unused_constructor): Variant 'Idle' is unused\n───╯\nWarning: [0006]\n   ╭─[ <lesson>\\examples\\17.mbtx:3:3 ]\n   │\n 3 │   Loading\n   │   ───┬───  \n   │      ╰───── Warning (unused_constructor): Variant 'Loading' is unused\n───╯\nWarning: [0006]\n   ╭─[ <lesson>\\examples\\17.mbtx:4:3 ]\n   │\n 4 │   Ready(String)\n   │   ──┬──  \n   │     ╰──── Warning (unused_constructor): Variant 'Ready' is never read\n───╯\n"
+  },
+  {
+    "example": "18.mbtx",
+    "passed": true,
+    "stdout": "done",
+    "diagnostics": "Warning: [0006]\n   ╭─[ <lesson>\\examples\\18.mbtx:1:18 ]\n   │\n 1 │ enum LoadState { Idle; Loading; Ready(String) }\n   │                  ──┬─  \n   │                    ╰─── Warning (unused_constructor): Variant 'Idle' is never constructed\n───╯\nWarning: [0006]\n   ╭─[ <lesson>\\examples\\18.mbtx:1:24 ]\n   │\n 1 │ enum LoadState { Idle; Loading; Ready(String) }\n   │                        ───┬───  \n   │                           ╰───── Warning (unused_constructor): Variant 'Loading' is never constructed\n───╯\n"
+  },
+  {
+    "example": "19.mbtx",
+    "passed": true,
+    "stdout": "0",
+    "diagnostics": ""
+  },
+  {
+    "example": "20.mbtx",
+    "passed": true,
+    "stdout": "21\nhello",
+    "diagnostics": ""
+  },
+  {
+    "example": "21.mbtx",
+    "passed": true,
+    "stdout": "9",
+    "diagnostics": ""
+  },
+  {
+    "example": "22.mbtx",
+    "passed": true,
+    "stdout": "learner",
+    "diagnostics": ""
+  },
+  {
+    "example": "23.mbtx",
+    "passed": true,
+    "stdout": "learner",
+    "diagnostics": ""
+  },
+  {
+    "example": "24.mbtx",
+    "passed": true,
+    "stdout": "true\nfalse",
+    "diagnostics": "Warning: [0009]\n   ╭─[ <lesson>\\examples\\24.mbtx:4:8 ]\n   │\n 4 │ struct Pair { x : Int; y : Int } derive(Eq)\n   │        ──┬─  \n   │          ╰─── Warning (struct_never_constructed): The struct Pair is never constructed\n───╯\n"
+  },
+  {
+    "example": "25.mbtx",
+    "passed": true,
+    "stdout": "negative",
+    "diagnostics": ""
+  },
+  {
+    "example": "26.mbtx",
+    "passed": true,
+    "stdout": "0",
+    "diagnostics": ""
+  },
+  {
+    "example": "27.mbtx",
+    "passed": true,
+    "stdout": "0",
+    "diagnostics": ""
+  },
+  {
+    "example": "28.mbtx",
+    "passed": true,
+    "stdout": "13",
+    "diagnostics": ""
+  },
+  {
+    "test_suite_passed": true,
+    "stdout": "Total tests: 7, passed: 7, failed: 0.\n",
+    "stderr": ""
+  }
+]

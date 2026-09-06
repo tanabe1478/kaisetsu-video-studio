@@ -1,0 +1,6 @@
+fn main {
+  let score = 3 * 3
+  println("score = \{score}")
+  let pair : (String, Int) = ("zunda", 9)
+  println(pair.1) // 9
+}

@@ -1,0 +1,9 @@
+fn accept(n : Int) -> Result[Int, String] {
+  if n >= 0 { Ok(n) } else { Err("negative") }
+}
+fn main {
+  match accept(-1) {
+    Ok(n) => println(n)
+    Err(reason) => println(reason)
+  }
+}

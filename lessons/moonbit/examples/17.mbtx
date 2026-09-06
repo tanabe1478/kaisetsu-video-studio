@@ -1,0 +1,9 @@
+enum LoadState {
+  Idle
+  Loading
+  Ready(String)
+}
+fn main {
+  let state : LoadState = Ready("done")
+  ignore(state)
+}

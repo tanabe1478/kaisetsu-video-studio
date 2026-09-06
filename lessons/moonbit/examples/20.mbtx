@@ -1,0 +1,7 @@
+fn[T] identity(value : T) -> T {
+  value
+}
+fn main {
+  println(identity(21))
+  println(identity("hello"))
+}

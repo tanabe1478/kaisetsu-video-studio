@@ -1,0 +1,9 @@
+fn main {
+  let n : Int = 8
+  let ratio : Double = 0.5
+  let ready : Bool = true
+  let label : String = "score"
+  println(n.to_double() + ratio) // 8.5
+  println(ready)
+  println(label)
+}

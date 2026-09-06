@@ -1,0 +1,7 @@
+fn or_zero(value : Int?) -> Int {
+  match value {
+    Some(n) => n
+    None => 0
+  }
+}
+fn main { println(or_zero(None)) }

@@ -2,3 +2,6 @@ assets/
 cache/
 output/
 __pycache__/
+_build/
+target/
+.mooncakes/

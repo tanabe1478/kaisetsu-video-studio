@@ -1,0 +1,8 @@
+struct Counter { value : Int }
+fn Counter::next(self : Counter) -> Int {
+  self.value + 1
+}
+fn main {
+  let counter = Counter::{ value: 8 }
+  println(counter.next()) // 9
+}

@@ -1,0 +1,9 @@
+enum LoadState { Idle; Loading; Ready(String) }
+fn message(state : LoadState) -> String {
+  match state {
+    Idle => "waiting"
+    Loading => "loading"
+    Ready(text) => text
+  }
+}
+fn main { println(message(Ready("done"))) }

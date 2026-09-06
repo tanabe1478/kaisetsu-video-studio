@@ -1,0 +1,6 @@
+fn add(a : Int, b : Int) -> Int {
+  a + b
+}
+fn main {
+  println(add(6, 7)) // 13
+}

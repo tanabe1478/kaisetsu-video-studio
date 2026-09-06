@@ -1,0 +1,8 @@
+struct Card {
+  name : String
+  points : Int
+}
+fn main {
+  let card = Card::{ name: "zunda", points: 12 }
+  println(card.points) // 12
+}

@@ -1,0 +1,8 @@
+struct Counter {
+  mut value : Int
+}
+fn main {
+  let counter = Counter::{ value: 1 }
+  counter.value = counter.value + 1
+  println(counter.value) // 2
+}

@@ -1,5 +1,6 @@
 """Local, script-driven VOICEVOX + PSD video renderer."""
 from pathlib import Path
+from functools import lru_cache
 import argparse, hashlib, io, json, math, subprocess, sys, wave
 import numpy as np
 import requests
@@ -24,7 +25,7 @@ def child(group, name):
     return next(x for x in group if x.name == name)
 
 def sprites(scenes):
-    dest = ROOT / 'assets' / 'sprites'; dest.mkdir(exist_ok=True)
+    dest = ROOT / 'assets' / 'sprites'; dest.mkdir(parents=True,exist_ok=True)
     psdpath = next((ROOT / 'assets' / 'original').rglob('*.psd'), None)
     if not psdpath:
         raise ValueError('assets/original に坂本アヒル無印2.3のPSDを置いてください。')
@@ -58,23 +59,29 @@ def synthesize(project, base, out):
     cache = ROOT / 'cache'; cache.mkdir(exist_ok=True)
     all_pcm, timings = [], []; total = 0; sample_rate = 24000
     for index, scene in enumerate(project['scenes']):
-        key = hashlib.sha256(json.dumps([scene['text'],style,project['speed'],version.json()],ensure_ascii=False).encode()).hexdigest()
-        path = cache / (key + '.wav')
-        if not path.exists():
-            print(f'Synthesizing {index+1}/{len(project["scenes"])}',flush=True)
-            query = api(base,'/audio_query',params={'text':scene['text'],'speaker':style}).json()
-            query.update(speedScale=project['speed'],outputSamplingRate=sample_rate,outputStereo=False)
-            data = api(base,'/synthesis',params={'speaker':style},json=query).content
-            with wave.open(io.BytesIO(data)) as f:
-                if f.getnchannels()!=1 or f.getsampwidth()!=2 or f.getframerate()!=sample_rate:
-                    raise ValueError('Unexpected VOICEVOX audio format')
-            path.write_bytes(data)
-        with wave.open(str(path)) as f: pcm=np.frombuffer(f.readframes(f.getnframes()),dtype='<i2').copy()
-        pcm = np.concatenate([pcm,np.zeros(int(.35*sample_rate),dtype=np.int16)])
+        print(f'Synthesizing scene {index+1}/{len(project["scenes"])}',flush=True)
+        segments=scene.get('narration') or [{'text':t} for t in chunks(scene['text'])]
+        parts=[]; captions=[]; offset=0
+        for segment in segments:
+            spoken=segment.get('speech',segment['text'])
+            key = hashlib.sha256(json.dumps([spoken,style,project['speed'],version.json()],ensure_ascii=False).encode()).hexdigest()
+            path = cache / (key + '.wav')
+            if not path.exists():
+                query = api(base,'/audio_query',params={'text':spoken,'speaker':style}).json()
+                query.update(speedScale=project['speed'],outputSamplingRate=sample_rate,outputStereo=False)
+                data = api(base,'/synthesis',params={'speaker':style},json=query).content
+                with wave.open(io.BytesIO(data)) as f:
+                    if f.getnchannels()!=1 or f.getsampwidth()!=2 or f.getframerate()!=sample_rate:
+                        raise ValueError('Unexpected VOICEVOX audio format')
+                path.write_bytes(data)
+            with wave.open(str(path)) as f: part=np.frombuffer(f.readframes(f.getnframes()),dtype='<i2').copy()
+            captions.append({'text':segment['text'],'start':offset/sample_rate,'end':(offset+len(part))/sample_rate})
+            offset+=len(part);parts.append(part)
+        pcm = np.concatenate(parts+[np.zeros(int(scene.get('pause',.6)*sample_rate),dtype=np.int16)])
         # Quantize scene lengths to video frames, keeping all later scenes aligned.
         frames=math.ceil(len(pcm)/sample_rate*FPS)
         pcm=np.pad(pcm,(0,int(frames*sample_rate/FPS)-len(pcm)))
-        timings.append({'start':total/sample_rate,'end':(total+len(pcm))/sample_rate,'frames':frames,'scene':scene})
+        timings.append({'start':total/sample_rate,'end':(total+len(pcm))/sample_rate,'frames':frames,'captions':captions,'scene':scene})
         total+=len(pcm);all_pcm.append(pcm)
     joined=np.concatenate(all_pcm)
     with wave.open(str(out/'narration.wav'),'wb') as f:
@@ -82,6 +89,7 @@ def synthesize(project, base, out):
     (out/'timeline.json').write_text(json.dumps(timings,ensure_ascii=False,indent=2),encoding='utf-8')
     return timings,all_pcm,sample_rate
 
+@lru_cache(maxsize=32)
 def font(size):
     return ImageFont.truetype('C:/Windows/Fonts/meiryob.ttc',size)
 
@@ -101,18 +109,40 @@ def chunks(text):
         if part:result.append(part)
     return result
 
+@lru_cache(maxsize=512)
+def caption_lines(text):
+    f=font(32)
+    lines=wrap(text,f,1100)
+    if len(lines)!=2:return lines
+    candidates=[]
+    for i in range(1,len(text)):
+        if text[i] in '、。！？,.!?)]}':continue
+        if text[i-1].isascii() and text[i].isascii() and text[i-1].isalpha() and text[i].isalpha():continue
+        left,right=text[:i],text[i:]
+        a,b=f.getlength(left),f.getlength(right)
+        if max(a,b)<=1100:
+            score=abs(a-b)-(120 if text[i-1] in '、。 ' else 0)
+            candidates.append((score,left,right))
+    return list(min(candidates)[1:]) if candidates else lines
+
 def scene_base(project, scene, index, count):
     im=Image.new('RGB',(W,H),'#f3f6ed');d=ImageDraw.Draw(im)
     d.rectangle((0,0,W,9),fill='#72b23f')
-    d.text((54,32),'ZUNDAMON STUDIO  /  PROTOTYPE 01',font=font(16),fill='#57813d')
+    d.text((54,32),project.get('series','ZUNDAMON STUDIO  /  PROTOTYPE 01'),font=font(16),fill='#57813d')
     d.text((54,71),project['title'],font=font(35),fill='#203a2a')
     d.rounded_rectangle((50,144,828,528),radius=24,fill='white')
-    d.text((80,174),f'{index+1:02d}  /  {count:02d}',font=font(18),fill='#72a34a')
+    d.text((80,174),f'{index+1:02d} / {count:02d}  '+scene.get('chapter',''),font=font(18),fill='#72a34a')
     for n,line in enumerate(wrap(scene['heading'],font(31),715)):
         d.text((80,215+n*43),line,font=font(31),fill='#203a2a')
-    for n,point in enumerate(scene.get('points',[])):
-        y=305+n*59;d.ellipse((82,y+10,94,y+22),fill='#80b952')
-        d.text((112,y),point,font=font(24),fill='#526452')
+    if scene.get('code'):
+        d.rounded_rectangle((74,272,806,514),radius=12,fill='#182734')
+        cf=ImageFont.truetype('C:/Windows/Fonts/consola.ttf',22)
+        for n,line in enumerate(scene['code'].splitlines()):
+            d.text((90,281+n*23),line,font=cf,fill='#b9ecc3' if line.lstrip().startswith('//') else '#e4edf6')
+    else:
+        for n,point in enumerate(scene.get('points',[])):
+            y=305+n*59;d.ellipse((82,y+10,94,y+22),fill='#80b952')
+            d.text((112,y),point,font=font(24),fill='#526452')
     d.text((54,691),'VOICEVOX:ずんだもん  /  立ち絵:坂本アヒル（無印2.3）',font=font(13),fill='#57664f')
     return im
 
@@ -126,7 +156,15 @@ def render(project, base, out):
     for s in project['scenes']:
         s.setdefault('expression','normal');s.setdefault('pose','normal')
         if s['expression'] not in EXPRESSIONS or s['pose'] not in POSES:raise ValueError('Unknown expression/pose')
+        if s.get('narration'):
+            s['text']=''.join(x['text'] for x in s['narration'])
+            if any(not x['text'].strip() or not x.get('speech',x['text']).strip() for x in s['narration']):raise ValueError('Empty narration segment')
         if not s.get('text','').strip():raise ValueError('Empty dialogue')
+        for seg in s.get('narration',[]):
+            if len(wrap(seg['text'],font(32),1100))>2:raise ValueError('Caption exceeds two lines')
+        if s.get('code'):
+            cf=ImageFont.truetype('C:/Windows/Fonts/consola.ttf',22)
+            if len(s['code'].splitlines())>10 or any(cf.getlength(line)>696 for line in s['code'].splitlines()):raise ValueError('Code exceeds panel size')
         if len(s.get('points',[]))>3 or any(font(24).getlength(p)>675 for p in s.get('points',[])):raise ValueError('Use up to 3 short points per scene')
         if len(wrap(s['heading'],font(31),715))>2:raise ValueError('Heading too long')
     out.mkdir(parents=True,exist_ok=True)
@@ -141,10 +179,9 @@ def render(project, base, out):
         try:
             for i,(item,audio) in enumerate(zip(timing,pcm)):
                 print(f'Rendering scene {i+1}/{len(timing)}',flush=True)
-                scene=item['scene'];bg=scene_base(project,scene,i,len(timing));texts=chunks(scene['text']);weights=np.cumsum([len(t) for t in texts]);weights=weights/weights[-1]
-                cuts=[0]+[round(float(w)*item['frames']) for w in weights]
-                for j,txt in enumerate(texts):
-                    subtitles.append(f'{len(subtitles)+1}\n{timestamp(item["start"]+cuts[j]/FPS)} --> {timestamp(item["start"]+cuts[j+1]/FPS)}\n{txt}\n')
+                scene=item['scene'];bg=scene_base(project,scene,i,len(timing));captions=item['captions']
+                for caption in captions:
+                    subtitles.append(f'{len(subtitles)+1}\n{timestamp(item["start"]+caption["start"])} --> {timestamp(item["start"]+caption["end"])}\n{caption["text"]}\n')
                 for n in range(item['frames']):
                     t=n/FPS;sample=audio[int(t*rate):int((t+.04)*rate)].astype(float)
                     speaking=bool(len(sample) and np.sqrt(np.mean(sample**2))>450)
@@ -152,8 +189,8 @@ def render(project, base, out):
                     im=bg.copy();sprite=images[scene['expression'],scene['pose'],blink,mouth]
                     im.paste(sprite,(830,108-int(2*math.sin(t*3))),sprite)
                     d=ImageDraw.Draw(im);d.rounded_rectangle((48,548,1232,678),radius=20,fill='#203b2a')
-                    caption=texts[min(len(texts)-1,int(np.searchsorted(cuts[1:],n,side='right')))]
-                    lines=wrap(caption,font(32),1100)
+                    caption=next((c['text'] for c in captions if c['start']<=t<c['end']),'')
+                    lines=caption_lines(caption)
                     for j,line in enumerate(lines):
                         d.text(((W-font(32).getlength(line))/2,562+(2-len(lines))*20+j*45),line,font=font(32),fill='white')
                     d.rectangle((50,672,50+int(1180*(i+n/item['frames'])/len(timing)),677),fill='#94d463')
@@ -163,6 +200,12 @@ def render(project, base, out):
             proc.stdin.close();proc.wait()
         if proc.returncode:raise RuntimeError(f'FFmpeg failed: see {out / "render.log"}')
     (out/'subtitles.srt').write_text('\n'.join(subtitles),encoding='utf-8-sig')
+    chapters=[];last=None
+    for item in timing:
+        name=item['scene'].get('chapter',item['scene']['heading'])
+        if name!=last:
+            chapters.append(f'{timestamp(item["start"]).split(",")[0]} {name}');last=name
+    (out/'chapters.txt').write_text('\n'.join(chapters),encoding='utf-8')
     print(f'Created {out / "demo.mp4"} ({timing[-1]["end"]:.2f}s)',flush=True)
 
 if __name__=='__main__':

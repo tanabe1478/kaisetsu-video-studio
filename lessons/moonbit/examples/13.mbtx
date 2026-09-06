@@ -1,0 +1,7 @@
+fn main {
+  let values : Array[Int] = [1, 2, 3]
+  values[0] = 9
+  values.push(4)
+  println(values[0]) // 9
+  println(values.length()) // 4
+}

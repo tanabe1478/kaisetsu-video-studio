@@ -1,0 +1,7 @@
+fn main {
+  let mut total = 0
+  for n in 0..<4 {
+    total = total + n
+  }
+  println(total) // 6
+}

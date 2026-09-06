@@ -1,0 +1,9 @@
+trait Named { title(Self) -> String }
+struct Badge { text : String }
+impl Named for Badge with title(self) {
+  self.text
+}
+fn main {
+  let badge = Badge::{ text: "learner" }
+  println(Named::title(badge))
+}

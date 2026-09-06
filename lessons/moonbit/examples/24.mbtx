@@ -1,0 +1,8 @@
+fn[T : Eq] same(a : T, b : T) -> Bool {
+  a == b
+}
+struct Pair { x : Int; y : Int } derive(Eq)
+fn main {
+  println(same(3, 3)) // true
+  println(same("a", "b")) // false
+}

@@ -1,0 +1,9 @@
+suberror Negative
+fn checked(n : Int) -> Int raise Negative {
+  if n < 0 { raise Negative }
+  n
+}
+fn main {
+  let n = try checked(-2) catch { Negative => 0 }
+  println(n)
+}

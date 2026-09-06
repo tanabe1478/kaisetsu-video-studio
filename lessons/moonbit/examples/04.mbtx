@@ -1,0 +1,5 @@
+fn main {
+  let points = 27
+  let doubled : Int = points * 2
+  println(doubled) // 54
+}

@@ -25,10 +25,15 @@ VOICEVOXが起動していなければ、既存のインストールからエン
 - 各場面の text: 読み上げるセリフ。heading: 見出し。points: 短い箇条書き3点以内。
 - expression: normal / happy / surprised / thinking
 - pose: normal / wave / point / think
+- code: 等幅フォントで表示するコード（最大10行）。pointsの代わりに表示。
+- chapter: 章名。章一覧の出力に使用。
+- narration: `{ "text": "表示字幕", "speech": "読み上げ用表記" }` の配列。speechは省略可。指定するとtextより優先。
+- pause: 場面末尾の無音時間（秒、既定0.6）。
 
 表情・腕・口・目は、実際のPSDレイヤーを切り替えて作成しています。
 音量で発話を検出して口を開閉し、定期的にまばたきします。
-字幕の場面境界は音声と同期していますが、場面内の字幕分割は文字数による概算です。
+字幕ごとに音声を合成し、各WAVの実長に字幕の表示時刻を合わせます。narration未指定時はtextから短い区間を自動分割します。
+長い字幕は2行の長さと句読点を考慮して改行します。音声の各音素へ字幕を逐語同期する方式ではありません。
 口パクは開閉の2段階で、母音別の口形・厳密な音素同期は未実装です。
 背景画像の挿入、BGM、複数人の掛け合い、タイムラインGUIも今後の拡張対象です。
 音声キャッシュにより変更のないセリフは再合成しません。
@@ -55,3 +60,8 @@ Python 3.13、Pillow、psd-tools、NumPy、requests、imageio-ffmpeg。
 新しい環境では `python -m pip install -r requirements.txt`。
 FFmpegはimageio-ffmpegに同梱された実行ファイルを使用します。
 日本語フォントはWindowsのメイリオを使用します。
+コード用フォントはWindowsのConsolasです。
+
+## 教材サンプル
+
+[MoonBit言語仕様入門](lessons/moonbit/README.md)：32場面・9章。台本、出典、実行できるコード例、検証手順を収録しています。
