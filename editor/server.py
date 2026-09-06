@@ -5,11 +5,13 @@ from urllib.parse import urlparse
 import argparse, copy, datetime, json, os, secrets, threading, uuid
 import math
 import sys, subprocess
+import brief
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0,str(ROOT))
 from direction import suggest, validate_direction, EXPRESSIONS, POSES
+from duration import estimate, engine_info
 STORE = HERE / 'workspace'
 LOCK = threading.RLock()
 TOKEN = secrets.token_urlsafe(32)
@@ -44,6 +46,8 @@ def validate(p):
     for key in ('title','series','speaker','style'):
         if key in p['meta'] and not isinstance(p['meta'][key],str):raise ValueError(f'{key}は文字列にしてください。')
     speed=p['meta'].get('speed',1)
+    target=p['meta'].get('targetMinutes',0)
+    if isinstance(target,bool) or not isinstance(target,(int,float)) or not math.isfinite(target) or not 0<=target<=120:raise ValueError('目標時間は0〜120分にしてください。0は指定なしです。')
     if not isinstance(speed,(int,float)) or not math.isfinite(speed) or not .5<=speed<=2:raise ValueError('話速は0.5〜2にしてください。')
     ids=set()
     for ch in p['chapters']:
@@ -150,6 +154,10 @@ class Handler(BaseHTTPRequestHandler):
         if not self.valid_host():return self.send(403,{'error':'localhostから開いてください。'})
         path=urlparse(self.path).path
         try:
+            if path=='/api/brief':
+                with LOCK:
+                    dest=STORE/'briefs'/'draft.json'
+                    return self.send(200,json.loads(dest.read_text(encoding='utf-8')) if dest.exists() else {})
             if path.startswith('/sprites/'):
                 allowed={f'/sprites/{e}-{p}.png' for e in EXPRESSIONS for p in POSES}
                 if path not in allowed:return self.send(404,{'error':'差分が見つかりません。'})
@@ -191,6 +199,19 @@ class Handler(BaseHTTPRequestHandler):
             length=int(self.headers.get('Content-Length','0'))
             if length<=0 or length>5_000_000:raise ValueError('ファイルは5MB以下にしてください。')
             data=json.loads(self.rfile.read(length));path=urlparse(self.path).path
+            if path in ('/api/brief','/api/brief/export'):
+                b=brief.validate(data['brief'])
+                with LOCK:
+                    folder=STORE/'briefs';folder.mkdir(parents=True,exist_ok=True)
+                    if path=='/api/brief':
+                        tmp=folder/'draft.tmp';tmp.write_bytes(encoded(b));os.replace(tmp,folder/'draft.json')
+                        return self.send(200,{'saved':True})
+                    prompt=brief.prompt(b);dest=folder/uid();dest.mkdir()
+                    (dest/'brief.json').write_bytes(encoded(b));(dest/'prompt.md').write_text(prompt,encoding='utf-8')
+                    return self.send(200,{'prompt':prompt,'directory':str(dest)})
+            if path=='/api/duration':
+                p=validate(data['project'])
+                return self.send(200,estimate(script(p),ROOT/'cache',engine_info()))
             with LOCK:
                 if path=='/api/direction':
                     p=validate(data['project']);target=data.get('sceneId')

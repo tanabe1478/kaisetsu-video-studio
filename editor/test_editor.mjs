@@ -15,7 +15,10 @@ async function setup(t){
  w.URL.createObjectURL=blob=>{state.downloads.push(blob);return 'blob:test';};w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=function(){};
  const registered={};w.document.modelContext={registerTool:tool=>{registered[tool.name]=tool;}};
  w.fetch=async(url,opts)=>{const body=opts.body?JSON.parse(opts.body):null;let status=200,result;
-  if(url==='/api/bootstrap')result={token:'test',projects:[state.saved],library:[]};
+  if(url==='/api/brief') {if(body)state.brief=body.brief;result=body?{saved:true}:(state.brief||{});}
+  else if(url==='/api/brief/export')result={prompt:'制作条件 '+body.brief.topic+' '+body.brief.targetMinutes+'分',directory:'C:/briefs/test'};
+  else if(url==='/api/duration')result={seconds:725.458,lowerSeconds:725.458,upperSeconds:725.458,exact:true,targetSeconds:(body.project.meta.targetMinutes||0)*60,suggestedCharacters:1700};
+  else if(url==='/api/bootstrap')result={token:'test',projects:[state.saved],library:[]};
   else if(url==='/api/save'){if(state.conflict){status=409;result={error:'競合しました'};}else{state.saved=body.project;state.saved.revision++;result={revision:state.saved.revision,updatedAt:'saved'};}}
   else if(url==='/api/export'){state.exported=body.project;result={directory:'C:/exports/test'};}
   else throw Error(url);
@@ -86,4 +89,20 @@ test('repository references are pinned and a URL produces a ChatGPT request',asy
  assert.match(x.$('#repository-prompt').value,/コミットを固定/);
  assert.equal(x.$('#repository-copy').hidden,false);
  x.input('#repository-url','javascript:alert(1)');x.click('#repository-request');assert.equal(x.$('#error').hidden,false);
+});
+
+test('brief conditions survive reopening and generate a request',async t=>{
+ const x=await setup(t);x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
+ x.input('[data-brief="topic"]','同期の仕組み');x.input('[data-brief="targetMinutes"]','5');x.input('[data-brief="structure"]','導入、例、まとめ');
+ x.click('#brief-generate');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.state.brief.targetMinutes,5);assert.equal(x.state.brief.outlineFirst,true);
+ assert.match(x.$('#brief-prompt').value,/同期の仕組み 5分/);assert.equal(x.$('#brief-result').hidden,false);
+ x.click('[data-close="brief-dialog"]');x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.$('[data-brief="structure"]').value,'導入、例、まとめ');
+});
+test('target duration is saved and included in revision handoff',async t=>{
+ const x=await setup(t);x.click('[data-select-project]');x.input('[data-field="project-targetMinutes"]','5');await x.flush();
+ await new Promise(r=>setTimeout(r,450));assert.match(x.$('#duration-detail').textContent,/12分05秒/);
+ x.click('[data-action="duration-request"]');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.state.exported.meta.targetMinutes,5);assert.match(x.$('#handoff-text').value,/目標は5分/);
 });

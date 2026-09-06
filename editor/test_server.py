@@ -85,5 +85,13 @@ class EditorTests(unittest.TestCase):
         self.assertEqual(result['chapters'][1]['scenes'][0]['lines'][0]['direction']['source'],'auto')
         stored=json.loads(server.project_path(p['id']).read_text(encoding='utf-8'))
         self.assertNotIn('direction',stored['chapters'][1]['scenes'][0]['lines'][0])
+    def test_brief_is_persisted_separately_and_exported(self):
+        b={'topic':'同期の解説','targetMinutes':10,'outlineFirst':True,'structure':'導入→例→まとめ'}
+        self.assertEqual(self.request('/api/brief',{'brief':b})[0],200)
+        self.assertEqual(self.request('/api/brief')[1],b)
+        status,result=self.request('/api/brief/export',{'brief':b});self.assertEqual(status,200)
+        self.assertTrue((Path(result['directory'])/'brief.json').is_file())
+        self.assertIn('10分',result['prompt'])
+        self.assertEqual(self.request('/api/bootstrap')[1]['projects'],[])
 
 if __name__=='__main__':unittest.main()
