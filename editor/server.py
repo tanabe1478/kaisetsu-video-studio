@@ -4,12 +4,30 @@ from pathlib import Path
 from urllib.parse import urlparse
 import argparse, copy, datetime, json, os, secrets, threading, uuid
 import math
+import sys, subprocess
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
+sys.path.insert(0,str(ROOT))
+from direction import suggest, validate_direction
 STORE = HERE / 'workspace'
 LOCK = threading.RLock()
 TOKEN = secrets.token_urlsafe(32)
+JOBS = {}
+
+def run_preview(identifier, document, dest):
+    try:
+        dest.mkdir(parents=True)
+        source=dest/'script.json';source.write_bytes(encoded(document))
+        with (dest/'process.log').open('w',encoding='utf-8') as log:
+            result=subprocess.run([sys.executable,str(ROOT/'studio.py'),str(source),'--output',str(dest)],
+                cwd=ROOT,stdout=log,stderr=log,timeout=600,
+                creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0),env={**os.environ,'PYTHONUTF8':'1'})
+        if result.returncode:
+            raise RuntimeError((dest/'process.log').read_text(encoding='utf-8')[-1800:])
+        with LOCK:JOBS[identifier].update(status='done',url=f'/preview/{identifier}.mp4')
+    except Exception as e:
+        with LOCK:JOBS[identifier].update(status='error',error=str(e))
 
 def uid(): return uuid.uuid4().hex
 def now(): return datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -50,6 +68,7 @@ def validate(p):
                 if not isinstance(line.get('id'),str) or line['id'] in ids:raise ValueError('セリフIDが重複しています。')
                 ids.add(line['id'])
                 if not isinstance(line.get('text'),str) or not isinstance(line.get('speech'),str):raise ValueError('セリフは文字列で入力してください。')
+                validate_direction(line.get('direction',{}))
     for note in p['feedback']:
         if not isinstance(note,dict):raise ValueError('メモの形式が正しくありません。')
         project_path(note.get('id'))
@@ -131,6 +150,15 @@ class Handler(BaseHTTPRequestHandler):
         if not self.valid_host():return self.send(403,{'error':'localhostから開いてください。'})
         path=urlparse(self.path).path
         try:
+            if path.startswith('/api/preview/'):
+                identifier=path.rsplit('/',1)[-1];project_path(identifier)
+                with LOCK:job=copy.deepcopy(JOBS.get(identifier))
+                return self.send(200,job) if job else self.send(404,{'error':'プレビューが見つかりません。'})
+            if path.startswith('/preview/') and path.endswith('.mp4'):
+                identifier=path.rsplit('/',1)[-1][:-4];project_path(identifier)
+                with LOCK:ready=JOBS.get(identifier,{}).get('status')=='done'
+                if ready:return self.send(200,(STORE/'previews'/identifier/'demo.mp4').read_bytes(),'video/mp4')
+                return self.send(404,{'error':'プレビューはまだありません。'})
             if path=='/api/bootstrap':
                 with LOCK:
                     projects=[json.loads(p.read_text(encoding='utf-8')) for p in STORE.glob('*.json')]
@@ -150,6 +178,24 @@ class Handler(BaseHTTPRequestHandler):
             if length<=0 or length>5_000_000:raise ValueError('ファイルは5MB以下にしてください。')
             data=json.loads(self.rfile.read(length));path=urlparse(self.path).path
             with LOCK:
+                if path=='/api/direction':
+                    p=validate(data['project']);target=data.get('sceneId')
+                    for ch in p['chapters']:
+                        for scene in ch['scenes']:
+                            if not target or target==scene['id']:suggest(scene['lines'],scene['data'],p['meta'].get('speed',1))
+                    return self.send(200,p)
+                if path=='/api/preview':
+                    if any(j['status']=='running' for j in JOBS.values()):return self.send(409,{'error':'プレビューを生成中です。完了後にもう一度お試しください。'})
+                    p=validate(data['project']);target=data['sceneId']
+                    scenes=[(c,s) for c in p['chapters'] for s in c['scenes'] if s['id']==target]
+                    if not scenes:raise ValueError('場面が見つかりません。')
+                    c,s=scenes[0]
+                    if not s['lines'] or sum(len(l['text']) for l in s['lines'])>1500:raise ValueError('プレビューは1〜1500文字の場面を選んでください。')
+                    p['chapters']=[{**c,'scenes':[s]}];document=script(p)
+                    identifier=uid();dest=STORE/'previews'/identifier
+                    JOBS[identifier]={'id':identifier,'status':'running','heading':s['data'].get('heading','')}
+                    threading.Thread(target=run_preview,args=(identifier,document,dest),daemon=True).start()
+                    return self.send(200,JOBS[identifier])
                 if path=='/api/import':
                     if 'libraryId' in data:
                         entry=next((x for x in library() if x['id']==data['libraryId']),None)

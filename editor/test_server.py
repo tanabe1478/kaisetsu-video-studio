@@ -67,5 +67,15 @@ class EditorTests(unittest.TestCase):
             elif kind=='nan':p['meta']['speed']=float('nan')
             else:p['feedback']=[{'id':'bad','target':'project','text':'x','status':'open'}]
             with self.assertRaises(ValueError):server.validate(p)
+    def test_direction_api_is_a_proposal_and_keeps_manual_settings(self):
+        status,p=self.request('/api/import',{'document':self.raw})
+        line=p['chapters'][0]['scenes'][0]['lines'][0]
+        line['direction']={'speed':.87,'source':'manual'}
+        status,result=self.request('/api/direction',{'project':p})
+        self.assertEqual(status,200)
+        self.assertEqual(result['chapters'][0]['scenes'][0]['lines'][0],line)
+        self.assertEqual(result['chapters'][1]['scenes'][0]['lines'][0]['direction']['source'],'auto')
+        stored=json.loads(server.project_path(p['id']).read_text(encoding='utf-8'))
+        self.assertNotIn('direction',stored['chapters'][1]['scenes'][0]['lines'][0])
 
 if __name__=='__main__':unittest.main()

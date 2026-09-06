@@ -32,6 +32,7 @@ VOICEVOXが起動していなければ、既存のインストールからエン
 - chapter: 章名。章一覧の出力に使用。
 - narration: `{ "text": "表示字幕", "speech": "読み上げ用表記" }` の配列。speechは省略可。指定するとtextより優先。
 - pause: 場面末尾の無音時間（秒、既定0.6）。
+- narration内のdirection: セリフごとのspeed、pause（追加の間）、expression、pose。省略時は従来設定を使用。エディターの自動提案・場面プレビューで調整可能。
 - bgm: ローカル音源のpath、title、creator、sourceとbelow_voice_db（既定22）。相対パスはリポジトリのルート基準。
 
 表情・腕・口・目は、実際のPSDレイヤーを切り替えて作成しています。

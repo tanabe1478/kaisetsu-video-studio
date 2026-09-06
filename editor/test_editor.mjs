@@ -55,3 +55,12 @@ test('optional agent feedback uses the same state and rejects missing targets',a
  assert.equal(x.state.saved.feedback[0].text,'読み方を確認');
  await assert.rejects(x.registered.add_script_feedback.execute({target:'missing',text:'x'}));
 });
+test('manual delivery is saved and invalid numeric edits are rejected',async t=>{
+ const x=await setup(t);x.input('[data-delivery="speed"]','0.9');
+ x.input('[data-delivery="expression"]','thinking','change');
+ x.input('[data-delivery="pause"]','0.4');
+ const line=()=>x.current().chapters[0].scenes[0].lines[0];
+ assert.equal(line().direction.source,'manual');assert.equal(line().direction.speed,.9);
+ x.input('[data-delivery="speed"]','20');assert.equal(line().direction.speed,.9);
+ await x.flush();assert.equal(x.state.saved.chapters[0].scenes[0].lines[0].direction.expression,'thinking');
+});

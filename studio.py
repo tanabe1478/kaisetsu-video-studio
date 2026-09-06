@@ -8,6 +8,7 @@ import imageio_ffmpeg
 from PIL import Image, ImageDraw, ImageFont
 from psd_tools import PSDImage
 from audio_mix import prepare_audio
+from direction import effective
 
 ROOT = Path(__file__).resolve().parent
 W, H, FPS = 1280, 720, 24
@@ -65,19 +66,22 @@ def synthesize(project, base, out):
         parts=[]; captions=[]; offset=0
         for segment in segments:
             spoken=segment.get('speech',segment['text'])
-            key = hashlib.sha256(json.dumps([spoken,style,project['speed'],version.json()],ensure_ascii=False).encode()).hexdigest()
+            delivery=effective(segment,scene,project['speed'])
+            key = hashlib.sha256(json.dumps([spoken,style,delivery['speed'],version.json()],ensure_ascii=False).encode()).hexdigest()
             path = cache / (key + '.wav')
             if not path.exists():
                 query = api(base,'/audio_query',params={'text':spoken,'speaker':style}).json()
-                query.update(speedScale=project['speed'],outputSamplingRate=sample_rate,outputStereo=False)
+                query.update(speedScale=delivery['speed'],outputSamplingRate=sample_rate,outputStereo=False)
                 data = api(base,'/synthesis',params={'speaker':style},json=query).content
                 with wave.open(io.BytesIO(data)) as f:
                     if f.getnchannels()!=1 or f.getsampwidth()!=2 or f.getframerate()!=sample_rate:
                         raise ValueError('Unexpected VOICEVOX audio format')
                 path.write_bytes(data)
             with wave.open(str(path)) as f: part=np.frombuffer(f.readframes(f.getnframes()),dtype='<i2').copy()
-            captions.append({'text':segment['text'],'start':offset/sample_rate,'end':(offset+len(part))/sample_rate})
+            captions.append({'text':segment['text'],'start':offset/sample_rate,'end':(offset+len(part))/sample_rate,'direction':delivery})
             offset+=len(part);parts.append(part)
+            gap=np.zeros(round(delivery['pause']*sample_rate),dtype=np.int16)
+            parts.append(gap);offset+=len(gap)
         pcm = np.concatenate(parts+[np.zeros(int(scene.get('pause',.6)*sample_rate),dtype=np.int16)])
         # Quantize scene lengths to video frames, keeping all later scenes aligned.
         frames=math.ceil(len(pcm)/sample_rate*FPS)
@@ -162,6 +166,7 @@ def render(project, base, out):
             if any(not x['text'].strip() or not x.get('speech',x['text']).strip() for x in s['narration']):raise ValueError('Empty narration segment')
         if not s.get('text','').strip():raise ValueError('Empty dialogue')
         for seg in s.get('narration',[]):
+            effective(seg,s,project.get('speed',1))
             if len(wrap(seg['text'],font(32),1100))>2:raise ValueError('Caption exceeds two lines')
         if s.get('code'):
             cf=ImageFont.truetype('C:/Windows/Fonts/consola.ttf',22)
@@ -171,7 +176,7 @@ def render(project, base, out):
     out.mkdir(parents=True,exist_ok=True)
     timing,pcm,rate=synthesize(project,base,out)
     audio_path=prepare_audio(project,ROOT,out)
-    print('Preparing PSD expressions...',flush=True);images=sprites(project['scenes'])
+    print('Preparing PSD expressions...',flush=True);images=sprites([effective(seg,s,project['speed']) for s in project['scenes'] for seg in (s.get('narration') or [{}])])
     ffmpeg=imageio_ffmpeg.get_ffmpeg_exe()
     command=[ffmpeg,'-y','-f','rawvideo','-vcodec','rawvideo','-pix_fmt','rgb24','-s',f'{W}x{H}','-r',str(FPS),'-i','-',
              '-i',str(audio_path),'-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-shortest','-movflags','+faststart',str(out/'demo.mp4')]
@@ -188,7 +193,8 @@ def render(project, base, out):
                     t=n/FPS;sample=audio[int(t*rate):int((t+.04)*rate)].astype(float)
                     speaking=bool(len(sample) and np.sqrt(np.mean(sample**2))>450)
                     mouth=speaking and n%6<4;blink=(t+i*.71)%3.4>3.24
-                    im=bg.copy();sprite=images[scene['expression'],scene['pose'],blink,mouth]
+                    delivery=next((c['direction'] for c in reversed(captions) if c['start']<=t),captions[0]['direction'])
+                    im=bg.copy();sprite=images[delivery['expression'],delivery['pose'],blink,mouth]
                     im.paste(sprite,(830,108),sprite)
                     d=ImageDraw.Draw(im);d.rounded_rectangle((48,548,1232,678),radius=20,fill='#203b2a')
                     caption=next((c['text'] for c in captions if c['start']<=t<c['end']),'')
