@@ -1,0 +1,141 @@
+{
+  "url": "https://github.com/wzhudev/reverse-linear-sync-engine.git",
+  "commit": "45dc91e78e03300b69cc088057a28c42cee35a41",
+  "checkedAt": "2026-09-06T06:31:58.865325+00:00",
+  "workingTreeDirty": false,
+  "files": [
+    {
+      "path": ".vscode/settings.json",
+      "bytes": 53
+    },
+    {
+      "path": "README.md",
+      "bytes": 98562
+    },
+    {
+      "path": "SUMMARY.md",
+      "bytes": 13135
+    },
+    {
+      "path": "code/Root.js",
+      "bytes": 5499782
+    },
+    {
+      "path": "code/html.js",
+      "bytes": 3099490
+    },
+    {
+      "path": "imgs/bootstrapping-overview.png",
+      "bytes": 468645
+    },
+    {
+      "path": "imgs/cached-transactions.png",
+      "bytes": 172500
+    },
+    {
+      "path": "imgs/change-snapshot.png",
+      "bytes": 108185
+    },
+    {
+      "path": "imgs/count-of-models.png",
+      "bytes": 256389
+    },
+    {
+      "path": "imgs/covering-partial-index-values.png",
+      "bytes": 356321
+    },
+    {
+      "path": "imgs/direct-referencies.png",
+      "bytes": 334212
+    },
+    {
+      "path": "imgs/introduction.png",
+      "bytes": 71388
+    },
+    {
+      "path": "imgs/lastsyncid.png",
+      "bytes": 62764
+    },
+    {
+      "path": "imgs/linear-databases.png",
+      "bytes": 191853
+    },
+    {
+      "path": "imgs/meta-meta.png",
+      "bytes": 276745
+    },
+    {
+      "path": "imgs/meta-persistence.png",
+      "bytes": 207815
+    },
+    {
+      "path": "imgs/model-partial-store-db.png",
+      "bytes": 128884
+    },
+    {
+      "path": "imgs/model-property-lookup.png",
+      "bytes": 309695
+    },
+    {
+      "path": "imgs/model-registry.png",
+      "bytes": 359452
+    },
+    {
+      "path": "imgs/model-store-class.png",
+      "bytes": 278703
+    },
+    {
+      "path": "imgs/model-store-db.png",
+      "bytes": 250656
+    },
+    {
+      "path": "imgs/models.png",
+      "bytes": 131783
+    },
+    {
+      "path": "imgs/modified-properties.png",
+      "bytes": 228537
+    },
+    {
+      "path": "imgs/object-stores.png",
+      "bytes": 285738
+    },
+    {
+      "path": "imgs/partial-index-stores.png",
+      "bytes": 158325
+    },
+    {
+      "path": "imgs/partial-index-values.png",
+      "bytes": 379761
+    },
+    {
+      "path": "imgs/references.png",
+      "bytes": 343917
+    },
+    {
+      "path": "imgs/search-for-symbols.png",
+      "bytes": 315112
+    },
+    {
+      "path": "imgs/title-image.png",
+      "bytes": 167846
+    },
+    {
+      "path": "imgs/transaction-overview.png",
+      "bytes": 453087
+    },
+    {
+      "path": "imgs/transaction-queues.png",
+      "bytes": 42457
+    },
+    {
+      "path": "imgs/transient-partial-index-keys.png",
+      "bytes": 196360
+    },
+    {
+      "path": "reverse-lse.excalidraw",
+      "bytes": 489421
+    }
+  ],
+  "executed": false
+}

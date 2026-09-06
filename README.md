@@ -9,6 +9,8 @@ ChatGPTと一緒に使う、台本JSONからMP4を作るローカルツールで
 ## 使い方
 
 台本を画面で直すには `./start-editor.ps1` を実行し、`http://127.0.0.1:8765/` を開きます。
+
+GitHubのリポジトリを題材にする場合は「台本を開く」のURL欄からChatGPTへの調査依頼を作れます。[調査と台本作成の手順](docs/REPOSITORY_LESSONS.md)と、[Linear同期エンジンの教材](lessons/reverse-linear-sync-engine/README.md)を用意しています。
 章・場面・セリフの編集と並べ替え、AIへのメモ、自動保存に対応しています。詳しくは [台本ノートの使い方](editor/README.md)。
 
 ChatGPTに「demo.jsonの台本を○○の説明に変えて、動画を再生成して」と依頼してください。

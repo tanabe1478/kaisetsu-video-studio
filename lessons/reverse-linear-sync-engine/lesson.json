@@ -1,0 +1,1870 @@
+{
+  "title": "Linear同期エンジンを読む",
+  "series": "REPOSITORY STUDY / REVERSE LINEAR SYNC ENGINE",
+  "speaker": "ずんだもん",
+  "style": "ノーマル",
+  "speed": 1.02,
+  "repository": {
+    "url": "https://github.com/wzhudev/reverse-linear-sync-engine",
+    "commit": "45dc91e78e03300b69cc088057a28c42cee35a41",
+    "checkedAt": "2026-09-06",
+    "kind": "調査記事・注釈付きコードの静的読解"
+  },
+  "bgm": {
+    "path": "assets/bgm/honwaka-puppu.mp3",
+    "title": "ほんわかぷっぷー",
+    "creator": "もっぴーさうんど",
+    "source": "https://dova-s.jp/bgm/detail/1854",
+    "below_voice_db": 22
+  },
+  "scenes": [
+    {
+      "chapter": "01 題材と読み方",
+      "heading": "速い画面と同期の両立",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "こんにちは、ずんだもんなのだ。今回はLinearの同期エンジンを調べたリポジトリを読むのだ。",
+          "speech": "こんにちは、ずんだもんなのだ。今回はリニアの同期エンジンを調べたリポジトリを読むのだ。",
+          "direction": {
+            "expression": "happy",
+            "pose": "wave",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "挨拶・答え"
+          }
+        },
+        {
+          "text": "画面がすぐ変わることと、複数の人のデータがそろうことは、別の課題なのだ。",
+          "speech": "画面がすぐ変わることと、複数の人のデータがそろうことは、別の課題なのだ。",
+          "direction": {
+            "expression": "happy",
+            "pose": "wave",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明／差分を保持"
+          }
+        },
+        {
+          "text": "課題の担当者を変える操作を例に、手元の変更がサーバーと合流するまでを追うのだ。",
+          "speech": "課題の担当者を変える操作を例に、手元の変更がサーバーと合流するまでを追うのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "ブラウザー、サーバー、データベースの役割を少し知っている人向けの解説なのだ。",
+          "speech": "ブラウザー、サーバー、データベースの役割を少し知っている人向けの解説なのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "README.md",
+          "startLine": 18,
+          "endLine": 60,
+          "note": "調査の目的と位置付け"
+        }
+      ],
+      "points": [
+        "題材：Linear同期エンジンの調査資料",
+        "操作への即応と、データの整合を分ける",
+        "具体例：課題の担当者を変更する"
+      ]
+    },
+    {
+      "chapter": "01 題材と読み方",
+      "heading": "公式ソース一式ではない",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "このリポジトリの中心は、調査記事と注釈付きのブラウザー用コードなのだ。",
+          "speech": "このリポジトリの中心は、調査記事と注釈付きのブラウザー用コードなのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "独立して起動できる同期サーバーや、完成したアプリ一式としては扱わないのだ。",
+          "speech": "独立して起動できる同期サーバーや、完成したアプリ一式としては扱わないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "短縮された名前に作者が意味を推定している箇所もあるので、名前だけで断定しないのだ。",
+          "speech": "短縮された名前に作者が意味を推定している箇所もあるので、名前だけで断定しないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "今回は固定したコミットを静的に読んだのだ。現在のLinear全体を保証する説明ではないのだ。",
+          "speech": "今回は固定したコミットを静的に読んだのだ。現在のリニア全体を保証する説明ではないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "README.md",
+          "startLine": 50,
+          "endLine": 62,
+          "note": "作者による調査方法・非公式性の説明"
+        },
+        {
+          "path": "code/Root.js",
+          "startLine": 1,
+          "endLine": 5,
+          "note": "同梱されていないバンドルへのimportがある"
+        }
+      ],
+      "points": [
+        "調査記事＋注釈付きバンドル",
+        "確認コミット：45dc91e",
+        "実行確認ではなく静的な読解"
+      ]
+    },
+    {
+      "chapter": "01 題材と読み方",
+      "heading": "読む順番を決める",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "まずSUMMARYで全体をつかみ、READMEで個別の説明を確認するのだ。",
+          "speech": "まずサマリーで全体をつかみ、リードミーで個別の説明を確認するのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "そのあと、注釈付きコードで関数の入力、状態の変更、呼び出し先を確かめるのだ。",
+          "speech": "そのあと、注釈付きコードで関数の入力、状態の変更、呼び出し先を確かめるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "たとえばModelRegistryという見出しから、モデル名を登録する処理へたどれるのだ。",
+          "speech": "たとえばモデルレジストリーという見出しから、モデル名を登録する処理へたどれるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "この教材にも場面ごとの出典を付けたのだ。台本エディターから該当箇所へ移動できるのだ。",
+          "speech": "この教材にも場面ごとの出典を付けたのだ。台本エディターから該当箇所へ移動できるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "SUMMARY.md",
+          "startLine": 1,
+          "endLine": 7,
+          "note": "要約の位置付け"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 7052,
+          "endLine": 7088,
+          "note": "モデル登録の実装例"
+        }
+      ],
+      "points": [
+        "SUMMARY → README → コード",
+        "見出しやメソッド名を検索",
+        "各場面の出典はコミット固定"
+      ]
+    },
+    {
+      "chapter": "02 データを置く場所",
+      "heading": "3つの場所を区別する",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "説明のために、データの置き場所を3つに分けて考えるのだ。",
+          "speech": "説明のために、データの置き場所を3つに分けて考えるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "画面が参照するメモリー、ブラウザーに残すIndexedDB、そしてサーバーなのだ。",
+          "speech": "画面が参照するメモリー、ブラウザーに残すインデックスド ディービー、そしてサーバーなのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "画面では未確定の変更を先に見せても、保存済みのモデル情報とは区別して扱うのだ。",
+          "speech": "画面では未確定の変更を先に見せても、保存済みのモデル情報とは区別して扱うのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "さらに送信待ちの操作も保存するので、保存データと未送信の操作を混ぜないことが大切なのだ。",
+          "speech": "さらに送信待ちの操作も保存するので、保存データと未送信の操作を混ぜないことが大切なのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "point",
+            "speed": 0.96,
+            "pause": 0,
+            "source": "auto",
+            "reason": "注意点・要点／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "README.md",
+          "startLine": 1080,
+          "endLine": 1088,
+          "note": "送信待ち操作の永続化"
+        },
+        {
+          "path": "README.md",
+          "startLine": 1203,
+          "endLine": 1207,
+          "note": "モデル表と楽観的変更の区別"
+        }
+      ],
+      "points": [
+        "メモリー：画面に見せる状態",
+        "IndexedDB：モデルと操作の保存先",
+        "サーバー：変更を受け付ける側"
+      ]
+    },
+    {
+      "chapter": "02 データを置く場所",
+      "heading": "モデルに振る舞いの情報を付ける",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "課題やチームなど、アプリで扱うまとまりをモデルとして表現するのだ。",
+          "speech": "課題やチームなど、アプリで扱うまとまりをモデルとして表現するのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "ModelRegistryには、モデル名から対応するクラスを引く仕組みがあるのだ。",
+          "speech": "モデルレジストリーには、モデル名から対応するクラスを引く仕組みがあるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "どの項目を保存するか、何を参照するか、いつ読むかという情報も、モデルの仕組みに関わるのだ。",
+          "speech": "どの項目を保存するか、何を参照するか、いつ読むかという情報も、モデルの仕組みに関わるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "単なるデータの箱に加えて、保存や読み込みのルールを集めていると理解するとよいのだ。",
+          "speech": "単なるデータの箱に加えて、保存や読み込みのルールを集めていると理解するとよいのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 7052,
+          "endLine": 7088,
+          "note": "ModelRegistryの登録と参照"
+        },
+        {
+          "path": "README.md",
+          "startLine": 199,
+          "endLine": 230,
+          "note": "プロパティのメタデータ"
+        }
+      ],
+      "points": [
+        "モデル名とクラスを対応付ける",
+        "プロパティ・参照の情報を管理",
+        "共通の仕組みでモデルを扱う"
+      ]
+    },
+    {
+      "chapter": "02 データを置く場所",
+      "heading": "画面は先に更新できる",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "課題の値を変更すると、メモリー上のモデルは先に更新されるのだ。",
+          "speech": "課題の値を変更すると、メモリー上のモデルは先に更新されるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "記事では、MobXによる監視と変更記録の仕組みが説明されているのだ。",
+          "speech": "記事では、モブエックスによる監視と変更記録の仕組みが説明されているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "そのあとsaveを呼ぶと、変更内容を送るための操作が作られるのだ。",
+          "speech": "そのあとセーブを呼ぶと、変更内容を送るための操作が作られるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "だから画面が変わっただけでは、サーバーへの保存まで終わったとは言えないのだ。",
+          "speech": "だから画面が変わっただけでは、サーバーへの保存まで終わったとは言えないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "README.md",
+          "startLine": 1024,
+          "endLine": 1053,
+          "note": "変更記録からUpdateTransaction生成まで"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 81006,
+          "endLine": 81009,
+          "note": "changeSnapshot取得"
+        }
+      ],
+      "points": [
+        "メモリーの変更は先に見える",
+        "変更記録から送信用の操作を作る",
+        "画面更新 ≠ 同期完了"
+      ]
+    },
+    {
+      "chapter": "03 起動と必要なデータ",
+      "heading": "起動時はローカルの状態を見る",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "起動するたびに全データを取得すると、通信量も待ち時間も増えてしまうのだ。",
+          "speech": "起動するたびに全データを取得すると、通信量も待ち時間も増えてしまうのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "このコードは、ローカルに準備できたモデルや、同期位置、データの鮮度を調べているのだ。",
+          "speech": "このコードは、ローカルに準備できたモデルや、同期位置、データの鮮度を調べているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "挨拶・答え／差分を保持"
+          }
+        },
+        {
+          "text": "その条件に応じて、全体の取得、ローカルからの起動、一部を補う起動を選ぶのだ。",
+          "speech": "その条件に応じて、全体の取得、ローカルからの起動、一部を補う起動を選ぶのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "手元にデータがあるかだけでなく、今それを使ってよいかも判断しているのだ。",
+          "speech": "手元にデータがあるかだけでなく、今それを使ってよいかも判断しているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 79926,
+          "endLine": 79951,
+          "note": "requiredBootstrapの分岐"
+        }
+      ],
+      "points": [
+        "full：全体を取り直す経路",
+        "local：手元のデータを使う経路",
+        "partial：不足分を補う経路"
+      ]
+    },
+    {
+      "chapter": "03 起動と必要なデータ",
+      "heading": "読み込むことと実体化は別",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "保存されたデータを取得することと、画面で使えるモデルをメモリーに作ることは別なのだ。",
+          "speech": "保存されたデータを取得することと、画面で使えるモデルをメモリーに作ることは別なのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "必要なときにモデルを使える状態へ整える処理を、ここでは実体化として考えるのだ。",
+          "speech": "必要なときにモデルを使える状態へ整える処理を、ここでは実体化として考えるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "記事のObject Poolは、読み込んだモデルをIDで探すための置き場なのだ。",
+          "speech": "記事のオブジェクトプールは、読み込んだモデルをアイディーで探すための置き場なのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "全件を最初からメモリーに広げない設計は、データが増えたときの負担を抑えるのに役立つのだ。",
+          "speech": "全件を最初からメモリーに広げない設計は、データが増えたときの負担を抑えるのに役立つのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "README.md",
+          "startLine": 680,
+          "endLine": 723,
+          "note": "HydrationとObject Poolの説明"
+        }
+      ],
+      "points": [
+        "保存形式のデータ → 使用できるモデル",
+        "Object PoolでIDから参照",
+        "必要な分だけメモリーへ"
+      ]
+    },
+    {
+      "chapter": "03 起動と必要なデータ",
+      "heading": "空と未取得を見分ける",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "課題にコメントが表示されない場合、本当に0件なのか、まだ取得していないのかで意味が違うのだ。",
+          "speech": "課題にコメントが表示されない場合、本当に0件なのか、まだ取得していないのかで意味が違うのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "この調査では、どの条件のデータを取得済みかを記録する部分インデックスが説明されているのだ。",
+          "speech": "この調査では、どの条件のデータを取得済みかを記録する部分インデックスが説明されているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "たとえば課題のIDを条件にコメントを読んだ、と覚えておけば、同じ問い合わせの判断に使えるのだ。",
+          "speech": "たとえば課題のアイディーを条件にコメントを読んだ、と覚えておけば、同じ問い合わせの判断に使えるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "単に一覧が空かどうかを見るだけでは、追加の通信が必要かを正しく決められないのだ。",
+          "speech": "単に一覧が空かどうかを見るだけでは、追加の通信が必要かを正しく決められないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "README.md",
+          "startLine": 859,
+          "endLine": 879,
+          "note": "部分インデックスと追加取得の判断"
+        }
+      ],
+      "points": [
+        "0件だった／まだ取得していない",
+        "取得済みの条件も状態として管理",
+        "課題IDなどを読み込みのキーにする"
+      ]
+    },
+    {
+      "chapter": "04 編集を送信する",
+      "heading": "変更をスナップショットにする",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "担当者を変更したという操作には、対象だけでなく、どの値をどう変えたかが必要なのだ。",
+          "speech": "担当者を変更したという操作には、対象だけでなく、どの値をどう変えたかが必要なのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "UpdateTransactionのコンストラクターは、モデルから変更のスナップショットを取得しているのだ。",
+          "speech": "UpdateTransactionのコンストラクターは、モデルから変更のスナップショットを取得しているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "その情報をもとに、送信する内容や、失敗したときに戻す処理を組み立てられるのだ。",
+          "speech": "その情報をもとに、送信する内容や、失敗したときに戻す処理を組み立てられるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "画面にあるモデル全体を毎回丸ごと送る、と考えるより、変更を取り出す仕組みを見るのだ。",
+          "speech": "画面にあるモデル全体を毎回丸ごと送る、と考えるより、変更を取り出す仕組みを見るのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81000,
+          "endLine": 81039,
+          "note": "更新操作の生成・送信・直列化"
+        }
+      ],
+      "points": [
+        "対象のモデル",
+        "変更したプロパティ",
+        "変更を記録したスナップショット"
+      ]
+    },
+    {
+      "chapter": "04 編集を送信する",
+      "heading": "送信待ちにも段階がある",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "作られた操作は、すぐ全部を同時送信するのではなく、キューで管理するのだ。",
+          "speech": "作られた操作は、すぐ全部を同時送信するのではなく、キューで管理するのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "作成直後、送信待ち、送信中という段階を分けると、今どこで待っているかが分かるのだ。",
+          "speech": "作成直後、送信待ち、送信中という段階を分けると、今どこで待っているかが分かるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "バッチにまとめる場合も、操作同士の独立性や送信サイズなどを考慮しているのだ。",
+          "speech": "バッチにまとめる場合も、操作同士の独立性や送信サイズなどを考慮しているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "まとめて送れば速い、だけではなく、まとめてもよい操作かどうかが重要なのだ。",
+          "speech": "まとめて送れば速い、だけではなく、まとめてもよい操作かどうかが重要なのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "point",
+            "speed": 0.96,
+            "pause": 0,
+            "source": "auto",
+            "reason": "注意点・要点／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "README.md",
+          "startLine": 1065,
+          "endLine": 1124,
+          "note": "キューの構造"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 81330,
+          "endLine": 81359,
+          "note": "サイズ制限と独立性の確認"
+        }
+      ],
+      "points": [
+        "作成 → 送信待ち → 送信中",
+        "まとめられる操作を選ぶ",
+        "サイズや依存関係も考慮"
+      ]
+    },
+    {
+      "chapter": "04 編集を送信する",
+      "heading": "オフラインでは操作を残す",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "通信が切れたとき、画面だけ変更しても、送るはずだった内容を失うと復旧できないのだ。",
+          "speech": "通信が切れたとき、画面だけ変更しても、送るはずだった内容を失うと復旧できないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "この設計では、未送信の操作をIndexedDBにも記録するのだ。",
+          "speech": "この設計では、未送信の操作をインデックスド ディービーにも記録するのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "コードには、保存した操作を読み出す処理と、オフラインで送れない操作をキューへ戻す処理があるのだ。",
+          "speech": "コードには、保存した操作を読み出す処理と、オフラインで送れない操作をキューへ戻す処理があるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "ただし未取得のデータまでオフラインで使えるわけではないので、利用範囲は分けて考えるのだ。",
+          "speech": "ただし未取得のデータまでオフラインで使えるわけではないので、利用範囲は分けて考えるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "point",
+            "speed": 0.96,
+            "pause": 0,
+            "source": "auto",
+            "reason": "注意点・要点／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81162,
+          "endLine": 81166,
+          "note": "保存操作の読み出し"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 81361,
+          "endLine": 81370,
+          "note": "オフライン時のキュー復帰"
+        },
+        {
+          "path": "README.md",
+          "startLine": 1084,
+          "endLine": 1088,
+          "note": "操作のIndexedDBへの記録"
+        }
+      ],
+      "points": [
+        "操作を永続化して再送に備える",
+        "送れなければ待ち行列へ戻す",
+        "未取得データの利用とは別問題"
+      ]
+    },
+    {
+      "chapter": "05 サーバーから受け取る",
+      "heading": "送信成功と同期完了は違う",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "操作を送信して成功の返事が来ても、その変更を受信側で処理し終えたとは限らないのだ。",
+          "speech": "操作を送信して成功の返事が来ても、その変更を受信側で処理し終えたとは限らないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "コードには、完了したけれど同期を待っている操作を置く、専用の配列があるのだ。",
+          "speech": "コードには、完了したけれど同期を待っている操作を置く、専用の配列があるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "送信の返事と、サーバーから届く変更通知は、別の流れとして扱っているのだ。",
+          "speech": "送信の返事と、サーバーから届く変更通知は、別の流れとして扱っているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "この区別がないと、まだ必要な手元の操作を早く消してしまう可能性があるのだ。",
+          "speech": "この区別がないと、まだ必要な手元の操作を早く消してしまう可能性があるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81375,
+          "endLine": 81384,
+          "note": "completedButUnsyncedTransactionsへの保持"
+        }
+      ],
+      "points": [
+        "送信側：操作が受け付けられた",
+        "受信側：対応する変更を反映した",
+        "この間にも待機状態がある"
+      ]
+    },
+    {
+      "chapter": "05 サーバーから受け取る",
+      "heading": "同期位置で待ち合わせる",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "lastSyncIdは、クライアントがどこまで同期を処理したかを扱うための番号なのだ。",
+          "speech": "ラストシンクアイディーは、クライアントがどこまで同期を処理したかを扱うための番号なのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "point",
+            "speed": 0.98,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "コード説明を少しゆっくり"
+          }
+        },
+        {
+          "text": "説明用に、手元が100まで反映し、操作の完了には102が必要だと考えるのだ。",
+          "speech": "説明用に、手元が100まで反映し、操作の完了には102が必要だと考えるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "point",
+            "speed": 0.98,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "コード説明を少しゆっくり"
+          }
+        },
+        {
+          "text": "101まで進んでもまだ待ち、102に届いたら待機を解除できるのだ。",
+          "speech": "101まで進んでもまだ待ち、102に届いたら待機を解除できるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "point",
+            "speed": 0.98,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "コード説明を少しゆっくり"
+          }
+        },
+        {
+          "text": "これは説明用の番号なのだ。単純に次の数字が来ないだけで欠落と決め付けないようにするのだ。",
+          "speech": "これは説明用の番号なのだ。単純に次の数字が来ないだけで欠落と決め付けないようにするのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "point",
+            "speed": 0.98,
+            "pause": 0,
+            "source": "auto",
+            "reason": "コード説明を少しゆっくり／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81396,
+          "endLine": 81415,
+          "note": "WaitSyncQueueの閾値比較"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 83253,
+          "endLine": 83260,
+          "note": "lastSyncId更新と待機解除"
+        }
+      ],
+      "code": "// Teaching example, not upstream code\ncurrent = 100\nrequired = 102\n101 < required  // keep waiting\n102 >= required // ready"
+    },
+    {
+      "chapter": "05 サーバーから受け取る",
+      "heading": "変更通知を順序立てて適用する",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "記事では、WebSocketでサーバーから変更通知を受け取る流れが説明されているのだ。",
+          "speech": "記事では、ウェブソケットでサーバーから変更通知を受け取る流れが説明されているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "applyDeltaは更新用のロックを使い、同期グループや必要な関連データを確認しているのだ。",
+          "speech": "applyDeltaは更新用のロックを使い、同期グループや必要な関連データを確認しているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "そのあと保存先とメモリー上のモデルを更新し、同期位置を進めるのだ。",
+          "speech": "そのあと保存先とメモリー上のモデルを更新し、同期位置を進めるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "通知を受け取って画面だけ書き換える処理より、関連する状態をそろえる仕事が多いのだ。",
+          "speech": "通知を受け取って画面だけ書き換える処理より、関連する状態をそろえる仕事が多いのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "README.md",
+          "startLine": 1246,
+          "endLine": 1285,
+          "note": "接続についての調査"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 83072,
+          "endLine": 83105,
+          "note": "更新ロックと依存取得"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 83253,
+          "endLine": 83260,
+          "note": "末尾での同期位置更新"
+        }
+      ],
+      "points": [
+        "グループ・依存データを確認",
+        "保存先とメモリーの更新を進める",
+        "同期位置と待機中の操作を更新"
+      ]
+    },
+    {
+      "chapter": "06 同時編集を考える",
+      "heading": "担当者の変更が交差したら",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "ここからは理解のための例なのだ。別の人が担当者をアリスに変えたとするのだ。",
+          "speech": "ここからは理解のための例なのだ。別の人が担当者をアリスに変えたとするのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "自分は担当者をボブに変えていて、その操作はまだ同期が完了していないのだ。",
+          "speech": "自分は担当者をボブに変えていて、その操作はまだ同期が完了していないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "そこでアリスへの変更通知が届いたら、サーバー側の新しい状態と、自分の未完了の希望を分けて考えるのだ。",
+          "speech": "そこでアリスへの変更通知が届いたら、サーバー側の新しい状態と、自分の未完了の希望を分けて考えるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "画面をただアリスに置き換えると、ボブに変えた手元の操作が見えなくなってしまうのだ。",
+          "speech": "画面をただアリスに置き換えると、ボブに変えた手元の操作が見えなくなってしまうのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81019,
+          "endLine": 81029,
+          "note": "更新操作のrebase"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 81147,
+          "endLine": 81159,
+          "note": "再適用する未完了操作の選択"
+        }
+      ],
+      "points": [
+        "受信した変更：担当者アリス",
+        "手元の未完了操作：担当者ボブ",
+        "両方の状態を区別して保持する"
+      ]
+    },
+    {
+      "chapter": "06 同時編集を考える",
+      "heading": "rebaseで手元の変更を重ねる",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "更新操作のrebaseは、受信後のモデルの値を、操作の基準となる値へ取り込むのだ。",
+          "speech": "更新操作のリベースは、受信後のモデルの値を、操作の基準となる値へ取り込むのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "そのうえで、手元の操作が設定したかった値を、モデルへもう一度反映するのだ。",
+          "speech": "そのうえで、手元の操作が設定したかった値を、モデルへもう一度反映するのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "さっきの例なら、受信したアリスを基準にしつつ、画面には未完了のボブへの変更を重ねるのだ。",
+          "speech": "さっきの例なら、受信したアリスを基準にしつつ、画面には未完了のボブへの変更を重ねるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "これは手元の見え方の話なのだ。最終結果は、サーバーが操作を受け付ける順序や成否にも関わるのだ。",
+          "speech": "これは手元の見え方の話なのだ。最終結果は、サーバーが操作を受け付ける順序や成否にも関わるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81019,
+          "endLine": 81029,
+          "note": "original更新とsetSerializedValue"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 81147,
+          "endLine": 81159,
+          "note": "対象モデルのUpdateTransactionのみ再適用"
+        }
+      ],
+      "points": [
+        "受信した状態を基準へ取り込む",
+        "未完了の更新内容を再適用",
+        "楽観的な表示と確定結果を区別"
+      ]
+    },
+    {
+      "chapter": "06 同時編集を考える",
+      "heading": "万能なマージとは考えない",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "担当者という1つの値を上書きすることと、文章を文字単位で共同編集することは違うのだ。",
+          "speech": "担当者という1つの値を上書きすることと、文章を文字単位で共同編集することは違うのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "この更新処理を読んだだけで、文章の編集意図をすべて保存できるとは言えないのだ。",
+          "speech": "この更新処理を読んだだけで、文章の編集意図をすべて保存できるとは言えないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "作者はCRDTなどと設計を比較しているけれど、ここでは具体的なコードの動作をまず押さえるのだ。",
+          "speech": "作者はシーアールディーティーなどと設計を比較しているけれど、ここでは具体的なコードの動作をまず押さえるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "採用する仕組みは、データの種類と、同時編集で何を残したいかから考えるのだ。",
+          "speech": "採用する仕組みは、データの種類と、同時編集で何を残したいかから考えるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81019,
+          "endLine": 81029,
+          "note": "プロパティごとの再設定"
+        },
+        {
+          "path": "README.md",
+          "startLine": 18,
+          "endLine": 39,
+          "note": "作者による設計比較。一般的な優劣の断定はしない"
+        }
+      ],
+      "points": [
+        "値の上書きと文章の共同編集は別",
+        "rebaseの対象と粒度を確認",
+        "用途に合う競合処理を考える"
+      ]
+    },
+    {
+      "chapter": "07 失敗・取り消し・範囲",
+      "heading": "拒否された変更をどう戻すか",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "楽観的に画面を変えるなら、サーバーに拒否されたときの扱いも必要なのだ。",
+          "speech": "楽観的に画面を変えるなら、サーバーに拒否されたときの扱いも必要なのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "記事では、失敗した操作のロールバックが説明されているのだ。",
+          "speech": "記事では、失敗した操作のロールバックが説明されているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "大切なのは、エラーを表示するだけでなく、未確定の操作と表示状態を整えることなのだ。",
+          "speech": "大切なのは、エラーを表示するだけでなく、未確定の操作と表示状態を整えることなのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "point",
+            "speed": 0.96,
+            "pause": 0.3,
+            "source": "auto",
+            "reason": "注意点・要点"
+          }
+        },
+        {
+          "text": "成功時の通信だけを実装して完成と考えず、拒否や再接続も追いかけるのだ。",
+          "speech": "成功時の通信だけを実装して完成と考えず、拒否や再接続も追いかけるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "point",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮／差分を保持"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "README.md",
+          "startLine": 1203,
+          "endLine": 1207,
+          "note": "操作の完了待ちと拒否時の扱い"
+        }
+      ],
+      "points": [
+        "成功経路だけでは足りない",
+        "未確定の操作を管理する",
+        "失敗後の表示と保存を整理"
+      ]
+    },
+    {
+      "chapter": "07 失敗・取り消し・範囲",
+      "heading": "Undoも新しい操作になる",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "共同編集でのUndoは、自分の画面だけを昔に戻せばよいわけではないのだ。",
+          "speech": "共同編集でのアンドゥは、自分の画面だけを昔に戻せばよいわけではないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "更新操作の取り消し処理を見ると、値を戻したあと、新しい更新操作を作っているのだ。",
+          "speech": "更新操作の取り消し処理を見ると、値を戻したあと、新しい更新操作を作っているのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "取り消した結果も同期の流れに乗せることで、ほかの画面へ伝えられるのだ。",
+          "speech": "取り消した結果も同期の流れに乗せることで、ほかの画面へ伝えられるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "ロールバックとUndoは目的が違うのだ。失敗からの回復と、ユーザーによる取り消しを区別するのだ。",
+          "speech": "ロールバックとアンドゥは目的が違うのだ。失敗からの回復と、ユーザーによる取り消しを区別するのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81042,
+          "endLine": 81049,
+          "note": "undoTransactionからsyncClient.update"
+        },
+        {
+          "path": "README.md",
+          "startLine": 1482,
+          "endLine": 1509,
+          "note": "UndoとRedoの調査"
+        }
+      ],
+      "points": [
+        "Undoの結果もほかの端末へ伝える",
+        "取り消しから新しい更新を作る",
+        "失敗時の回復とは目的が違う"
+      ]
+    },
+    {
+      "chapter": "07 失敗・取り消し・範囲",
+      "heading": "全データを全員へ配らない",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "同期には、何を速く届けるかだけでなく、誰に何を届けるかという問題もあるのだ。",
+          "speech": "同期には、何を速く届けるかだけでなく、誰に何を届けるかという問題もあるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "applyDeltaには、同期グループへの追加や削除を扱う処理があるのだ。",
+          "speech": "applyDeltaには、同期グループへの追加や削除を扱う処理があるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "所属が変わると、必要なデータの取得や、不要になったモデルの扱いも変わるのだ。",
+          "speech": "所属が変わると、必要なデータの取得や、不要になったモデルの扱いも変わるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "ただしクライアントのコードだけを見て、サーバーの権限制御まで検証できたとは言わないのだ。",
+          "speech": "ただしクライアントのコードだけを見て、サーバーの権限制御まで検証できたとは言わないのだ。",
+          "direction": {
+            "expression": "happy",
+            "pose": "wave",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "挨拶・答え／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 83084,
+          "endLine": 83093,
+          "note": "グループ変更の処理"
+        },
+        {
+          "path": "README.md",
+          "startLine": 1415,
+          "endLine": 1421,
+          "note": "モデル更新とグループ離脱についての分析"
+        }
+      ],
+      "points": [
+        "同期する範囲をグループで扱う",
+        "所属変更で必要なデータも変わる",
+        "サーバーの権限実装は別の確認対象"
+      ]
+    },
+    {
+      "chapter": "08 理解の確認",
+      "heading": "小問：返事が来たら消してよい？",
+      "expression": "thinking",
+      "pose": "think",
+      "pause": 2.5,
+      "narration": [
+        {
+          "text": "ここで小問なのだ。変更の送信は成功したけれど、対応する変更通知はまだ届いていないのだ。",
+          "speech": "ここで小問なのだ。変更の送信は成功したけれど、対応する変更通知はまだ届いていないのだ。",
+          "direction": {
+            "expression": "thinking",
+            "pose": "think",
+            "speed": 0.96,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "問いかけ"
+          }
+        },
+        {
+          "text": "この操作を、受信待ちの管理からすぐに消してよいだろうか。",
+          "speech": "この操作を、受信待ちの管理からすぐに消してよいだろうか。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "途中でほかの変更通知が来た場合に、自分の未反映の変更をどう扱うか考えてほしいのだ。",
+          "speech": "途中でほかの変更通知が来た場合に、自分の未反映の変更をどう扱うか考えてほしいのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 0.96,
+            "pause": 0,
+            "source": "auto",
+            "reason": "問いかけ／場面末尾の間を考慮／差分を保持"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81375,
+          "endLine": 81384,
+          "note": "受信完了まで操作を保持する条件"
+        }
+      ],
+      "points": [
+        "送信は成功",
+        "対応する通知は未着",
+        "未反映の操作を管理する必要は？"
+      ]
+    },
+    {
+      "chapter": "08 理解の確認",
+      "heading": "答え：対応する同期位置まで待つ",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "答えは、送信待ちの保存と、受信完了までの管理を区別する、なのだ。",
+          "speech": "答えは、送信待ちの保存と、受信完了までの管理を区別する、なのだ。",
+          "direction": {
+            "expression": "happy",
+            "pose": "wave",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "挨拶・答え"
+          }
+        },
+        {
+          "text": "このコードは、送信を終えた操作の保存記録を削除したあと、必要なら受信待ちの配列へ残すのだ。",
+          "speech": "このコードは、送信を終えた操作の保存記録を削除したあと、必要なら受信待ちの配列へ残すのだ。",
+          "direction": {
+            "expression": "happy",
+            "pose": "wave",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明／差分を保持"
+          }
+        },
+        {
+          "text": "対応する同期位置まで進んだ操作は、rebaseの対象から外せるのだ。",
+          "speech": "対応する同期位置まで進んだ操作は、リベースの対象から外せるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "保存済み、送信済み、同期済みを、同じ意味で使わないことが要点なのだ。",
+          "speech": "保存済み、送信済み、同期済みを、同じ意味で使わないことが要点なのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81375,
+          "endLine": 81384,
+          "note": "保存記録削除と受信待ち"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 81151,
+          "endLine": 81159,
+          "note": "同期位置に応じた再適用対象の整理"
+        }
+      ],
+      "points": [
+        "再送用の保存からは削除",
+        "必要なら受信待ちとして保持",
+        "対応する同期位置に届けば整理"
+      ]
+    },
+    {
+      "chapter": "08 理解の確認",
+      "heading": "自分のツールへ持ち帰る視点",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "今回の読み方は、同期エンジンをそのまま移植するためだけのものではないのだ。",
+          "speech": "今回の読み方は、同期エンジンをそのまま移植するためだけのものではないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "自分のツールでも、画面の状態、保存した状態、処理待ちの操作を分けると考えやすいのだ。",
+          "speech": "自分のツールでも、画面の状態、保存した状態、処理待ちの操作を分けると考えやすいのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "まず通常の編集を追い、次に通信断、拒否、同時編集、取り消しを順に確かめるのだ。",
+          "speech": "まず通常の編集を追い、次に通信断、拒否、同時編集、取り消しを順に確かめるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "付属の小さな学習用モデルでも、同期位置と未完了の操作を分ける考え方を試せるのだ。",
+          "speech": "付属の小さな学習用モデルでも、同期位置と未完了の操作を分ける考え方を試せるのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "通常の説明／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "code/html.js",
+          "startLine": 81396,
+          "endLine": 81415,
+          "note": "待機の考え方"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 81019,
+          "endLine": 81029,
+          "note": "未完了更新の重ね合わせ"
+        }
+      ],
+      "points": [
+        "画面・保存・操作待ちを区別",
+        "成功以外の経路も確認",
+        "学習用モデルは独自の簡略化"
+      ]
+    },
+    {
+      "chapter": "08 理解の確認",
+      "heading": "今回確認したことと次の一歩",
+      "expression": "normal",
+      "pose": "point",
+      "pause": 0.7,
+      "narration": [
+        {
+          "text": "今回は調査資料と注釈付きコードから、読み込み、操作の送信、変更の受信をつなげて読んだのだ。",
+          "speech": "今回は調査資料と注釈付きコードから、読み込み、操作の送信、変更の受信をつなげて読んだのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "元のコードは実行していないのだ。実際のサービスの性能や、サーバー側の正しさは今回の確認範囲に含まれないのだ。",
+          "speech": "元のコードは実行していないのだ。実際のサービスの性能や、サーバー側の正しさは今回の確認範囲に含まれないのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "詳しく知りたい箇所は、各場面の出典から、条件分岐や呼び出し先を自分でたどってほしいのだ。",
+          "speech": "詳しく知りたい箇所は、各場面の出典から、条件分岐や呼び出し先を自分でたどってほしいのだ。",
+          "direction": {
+            "expression": "normal",
+            "pose": "normal",
+            "speed": 1.02,
+            "pause": 0.18,
+            "source": "auto",
+            "reason": "通常の説明"
+          }
+        },
+        {
+          "text": "速い画面の裏には、未完了の仕事を丁寧に管理する仕組みがあるのだ。今回はここまでなのだ。",
+          "speech": "速い画面の裏には、未完了の仕事を丁寧に管理する仕組みがあるのだ。今回はここまでなのだ。",
+          "direction": {
+            "expression": "happy",
+            "pose": "wave",
+            "speed": 1.02,
+            "pause": 0,
+            "source": "auto",
+            "reason": "挨拶・答え／場面末尾の間を考慮"
+          }
+        }
+      ],
+      "sources": [
+        {
+          "path": "README.md",
+          "startLine": 50,
+          "endLine": 62,
+          "note": "調査の位置付け"
+        },
+        {
+          "path": "code/html.js",
+          "startLine": 81069,
+          "endLine": 81090,
+          "note": "操作管理の入口"
+        }
+      ],
+      "points": [
+        "調査対象とコミットを明示",
+        "静的読解と実行確認を区別",
+        "出典からコードへ戻って確かめる"
+      ]
+    }
+  ]
+}

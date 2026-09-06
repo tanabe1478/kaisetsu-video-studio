@@ -6,8 +6,8 @@ const html=await readFile(new URL('./static/index.html',import.meta.url),'utf8')
 const js=await readFile(new URL('./static/app.js',import.meta.url),'utf8');
 const key=n=>n.toString(16).padStart(32,'0');
 async function setup(t){
- const p={format:'kaisetsu-outline-v1',id:key(1),revision:0,meta:{title:'教材',bgm:{path:'music.mp3'}},updatedAt:'now',feedback:[],chapters:[
- {id:key(2),title:'導入',scenes:[{id:key(3),data:{heading:'最初',code:'let x = 1'},lines:[{id:key(4),text:'型の説明',speech:'かたの説明',custom:42}]}]},
+ const p={format:'kaisetsu-outline-v1',id:key(1),revision:0,meta:{title:'教材',bgm:{path:'music.mp3'},repository:{url:'https://github.com/example/repository',commit:'a'.repeat(40)}},updatedAt:'now',feedback:[],chapters:[
+ {id:key(2),title:'導入',scenes:[{id:key(3),data:{heading:'最初',code:'let x = 1',sources:[{path:'src/index.ts',startLine:10,endLine:20,note:'処理の入口'}]},lines:[{id:key(4),text:'型の説明',speech:'かたの説明',custom:42}]}]},
  {id:key(5),title:'応用',scenes:[]}]};
  const dom=new JSDOM(html,{url:'http://127.0.0.1:8765',runScripts:'outside-only'}),w=dom.window;
  t.after(()=>w.close());w.structuredClone=structuredClone;w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
@@ -78,4 +78,12 @@ test('sprite preview follows line overrides and scene inheritance',async t=>{
  x.input('[data-field="scene-expression"]','happy','change');
  assert.match(x.$('.delivery img').src,/thinking-think.png$/);
  assert.match(x.$('.settings img').src,/happy-normal.png$/);
+});
+test('repository references are pinned and a URL produces a ChatGPT request',async t=>{
+ const x=await setup(t);const link=x.$('.repository-sources li a');
+ assert.equal(link.href,'https://github.com/example/repository/blob/'+'a'.repeat(40)+'/src/index.ts#L10-L20');
+ x.input('#repository-url','https://github.com/wzhudev/reverse-linear-sync-engine');x.click('#repository-request');
+ assert.match(x.$('#repository-prompt').value,/コミットを固定/);
+ assert.equal(x.$('#repository-copy').hidden,false);
+ x.input('#repository-url','javascript:alert(1)');x.click('#repository-request');assert.equal(x.$('#error').hidden,false);
 });
