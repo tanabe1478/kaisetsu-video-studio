@@ -161,8 +161,16 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(404,{'error':'プレビューはまだありません。'})
             if path=='/api/bootstrap':
                 with LOCK:
-                    projects=[json.loads(p.read_text(encoding='utf-8')) for p in STORE.glob('*.json')]
-                return self.send(200,{'token':TOKEN,'projects':sorted(projects,key=lambda x:x['updatedAt'],reverse=True),'library':library()})
+                    projects=[]
+                    for path in STORE.glob('*.json'):
+                        # Only UUID-named project files belong in the document list.
+                        try:project_path(path.stem)
+                        except ValueError:continue
+                        project=json.loads(path.read_text(encoding='utf-8'))
+                        validate(project)
+                        if project['id']!=path.stem:raise ValueError(f'台本IDがファイル名と一致しません：{path.name}')
+                        projects.append(project)
+                return self.send(200,{'token':TOKEN,'projects':sorted(projects,key=lambda x:x.get('updatedAt',''),reverse=True),'library':library()})
             static={'/':('index.html','text/html; charset=utf-8'),'/app.js':('app.js','text/javascript; charset=utf-8'),'/style.css':('style.css','text/css; charset=utf-8')}
             if path in static:
                 name,kind=static[path];return self.send(200,(HERE/'static'/name).read_bytes(),kind)

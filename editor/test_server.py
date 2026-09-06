@@ -67,6 +67,14 @@ class EditorTests(unittest.TestCase):
             elif kind=='nan':p['meta']['speed']=float('nan')
             else:p['feedback']=[{'id':'bad','target':'project','text':'x','status':'open'}]
             with self.assertRaises(ValueError):server.validate(p)
+    def test_bootstrap_ignores_auxiliary_json_without_losing_projects(self):
+        p=server.import_script(self.raw);server.write(p)
+        (server.STORE/'preview-check.json').write_text('{"status":"done"}',encoding='utf-8')
+        (server.STORE/'unrelated.json').write_text('not json',encoding='utf-8')
+        status,boot=self.request('/api/bootstrap')
+        self.assertEqual(status,200)
+        self.assertEqual([x['id'] for x in boot['projects']],[p['id']])
+        self.assertTrue((server.STORE/'preview-check.json').exists())
     def test_direction_api_is_a_proposal_and_keeps_manual_settings(self):
         status,p=self.request('/api/import',{'document':self.raw})
         line=p['chapters'][0]['scenes'][0]['lines'][0]
