@@ -3,13 +3,14 @@ from pathlib import Path
 import math, re
 from functools import lru_cache
 from PIL import Image, ImageDraw, ImageFont, ImageOps
+from fonts import font
 
 ROOT=Path(__file__).resolve().parent
 
 def local_asset(value):
     if not isinstance(value,str) or not value:raise ValueError('素材の相対パスを指定してください。')
     path=(ROOT/value).resolve()
-    if not path.is_relative_to(ROOT/'assets'):raise ValueError('素材はassets内に置いてください。')
+    if not path.is_relative_to((ROOT/'assets').resolve()):raise ValueError('素材はassets内に置いてください。')
     if not path.is_file():raise ValueError(f'素材が見つかりません: {value}')
     return path
 
@@ -64,9 +65,6 @@ def validate_presentation(project):
                 if isinstance(v,bool) or not isinstance(v,int) or not 0<=v<=4:raise ValueError('黒板の表示数・強調は0〜4です。')
     return project
 
-@lru_cache(maxsize=64)
-def font(size):return ImageFont.truetype('C:/Windows/Fonts/meiryob.ttc',size)
-
 def fit_text(draw,text,box,color,max_size=28):
     x,y,w,h=box
     for size in range(max_size,11,-1):
@@ -119,7 +117,7 @@ def backdrop(project,scene,index=0,count=1,line=None,motion_position=1.75):
     elif not scene.get('board'):
         d.rectangle((275,216,1005,499),fill='#193f38')
         if scene.get('code'):
-            f=ImageFont.truetype('C:/Windows/Fonts/consola.ttf',22)
+            f=font(22, code=True)
             for i,text in enumerate(scene['code'].splitlines()):d.text((291,229+i*24),text,font=f,fill='#e0eee5')
         else:fit_text(d,'\n'.join(scene.get('points',[])),(295,240,690,244),'#e0eee5',26)
     return im

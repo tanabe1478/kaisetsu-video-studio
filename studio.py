@@ -9,6 +9,7 @@ from PIL import Image, ImageDraw, ImageFont
 from psd_tools import PSDImage
 from audio_mix import prepare_audio
 from direction import effective
+from fonts import font
 from presentation import cast, character, voice_style, validate_presentation, local_asset, backdrop, draw_people, credits
 
 ROOT = Path(__file__).resolve().parent
@@ -106,10 +107,6 @@ def synthesize(project, base, out):
     (out/'timeline.json').write_text(json.dumps(timings,ensure_ascii=False,indent=2),encoding='utf-8')
     return timings,all_pcm,sample_rate
 
-@lru_cache(maxsize=32)
-def font(size):
-    return ImageFont.truetype('C:/Windows/Fonts/meiryob.ttc',size)
-
 def wrap(text, f, width):
     lines=['']
     for char in text:
@@ -153,7 +150,7 @@ def scene_base(project, scene, index, count):
         d.text((80,215+n*43),line,font=font(31),fill='#203a2a')
     if scene.get('code'):
         d.rounded_rectangle((74,272,806,514),radius=12,fill='#182734')
-        cf=ImageFont.truetype('C:/Windows/Fonts/consola.ttf',22)
+        cf=font(22, code=True)
         for n,line in enumerate(scene['code'].splitlines()):
             d.text((90,281+n*23),line,font=cf,fill='#b9ecc3' if line.lstrip().startswith('//') else '#e4edf6')
     else:
@@ -193,7 +190,7 @@ def render(project, base, out):
             effective(seg,s,project.get('speed',1))
             if len(wrap(seg['text'],font(32),1100))>2:raise ValueError('Caption exceeds two lines')
         if s.get('code') and not s.get('board'):
-            cf=ImageFont.truetype('C:/Windows/Fonts/consola.ttf',22)
+            cf=font(22, code=True)
             if len(s['code'].splitlines())>10 or any(cf.getlength(line)>696 for line in s['code'].splitlines()):raise ValueError('Code exceeds panel size')
         if not s.get('board') and (len(s.get('points',[]))>3 or any(font(24).getlength(p)>675 for p in s.get('points',[]))):raise ValueError('Use up to 3 short points per scene')
         if len(wrap(s['heading'],font(31),715))>2:raise ValueError('Heading too long')
