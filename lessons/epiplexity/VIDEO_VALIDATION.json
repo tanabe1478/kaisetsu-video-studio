@@ -1,0 +1,68 @@
+{
+  "duration_seconds": 1199.6666666666667,
+  "container_duration_seconds": 1199.67,
+  "resolution": [
+    1280,
+    720
+  ],
+  "fps": 24.0,
+  "scenes": 29,
+  "chapters": [
+    {
+      "name": "01 導入",
+      "start": 0.0,
+      "end": 91.58333333333333
+    },
+    {
+      "name": "02 情報量と圧縮の準備",
+      "start": 91.58333333333333,
+      "end": 240.83333333333334
+    },
+    {
+      "name": "03 Epiplexityの定義",
+      "start": 240.83333333333334,
+      "end": 414.25
+    },
+    {
+      "name": "04 実際にはどう測るか",
+      "start": 414.25,
+      "end": 541.4166666666666
+    },
+    {
+      "name": "05 3つの疑問を解く",
+      "start": 541.4166666666666,
+      "end": 756.0416666666666
+    },
+    {
+      "name": "06 チェスの実験",
+      "start": 756.0416666666666,
+      "end": 934.7916666666666
+    },
+    {
+      "name": "07 データ選択への応用",
+      "start": 934.7916666666666,
+      "end": 1076.8333333333333
+    },
+    {
+      "name": "08 限界と理解チェック",
+      "start": 1076.8333333333333,
+      "end": 1199.6666666666667
+    }
+  ],
+  "caption_segments": 208,
+  "bytes": 43906964,
+  "full_av_decode": "passed",
+  "caption_and_scene_timeline": "passed",
+  "script_sha256": "71033ff15c7f4aff6292fd5c0d8544d4db7e3e658d4a8a9800ff2c28965ccfa3",
+  "bgm": "ほんわかぷっぷー",
+  "audio_listening_review": "not performed",
+  "embedded_chapters_verified": 8,
+  "visual_review_seconds": [
+    12,
+    550,
+    900,
+    1185
+  ],
+  "visual_review": "passed",
+  "fullVideoRendered": true
+}

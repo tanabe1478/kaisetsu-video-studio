@@ -13,3 +13,9 @@
 `python lessons/epiplexity/verify_lesson.py`で現在のJSONを検証できる。静止画はGit管理外の`output/epiplexity-script-check/`へ出力する。
 
 音声合成による尺確認は行うが、台本承認段階では全編MP4を生成しない。発音を人が試聴したかどうかは検証記録の`listened`で明示する。生成時は台本ノートで保存・エクスポートした最新内容を使う。
+
+## 承認後の全編動画（2026-09-07）
+
+ユーザー指定のエクスポートを確認したコピーから、全編動画を生成した。完成尺19分59.67秒、1280×720・24fps、8チャプター、BGM「ほんわかぷっぷー」。ファイルはGit管理外の`output/epiplexity-20260907-final/epiplexity.mp4`。
+
+`finalize_video.py OUTPUT SCRIPT`は生成した動画にチャプターを付け、映像・音声の全編デコード、元台本と字幕・話者・図解タイミングの一致を確認する。今回の記録は`VIDEO_VALIDATION.json`。完成MP4の冒頭・中盤・終盤の抽出画像を目視確認した。発音の試聴は未実施。
