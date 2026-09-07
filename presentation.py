@@ -49,7 +49,7 @@ def validate_presentation(project):
         if not isinstance(c,dict):raise ValueError('話者設定が不正です。')
         if not isinstance(c.get('id'),str) or not re.fullmatch(r'[a-zA-Z0-9_-]{1,40}',c['id']) or c['id'] in ids:raise ValueError('話者IDが不正・重複しています。')
         ids.add(c['id'])
-        for k in ('name','speaker','style','art','credit','mouthArt'):
+        for k in ('name','speaker','style','art','credit','mouthArt','audioCredit'):
             if not isinstance(c.get(k,''),str) or len(c.get(k,''))>300:raise ValueError('話者設定は300文字以内の文字列です。')
         if not re.fullmatch(r'#[0-9a-fA-F]{6}',c.get('color','#bce88a')):raise ValueError('字幕色は#RRGGBBです。')
     for scene in project.get('scenes',[]):
@@ -169,7 +169,7 @@ def credits(project):
     for c in cast(project):
         lines=[l for s in project.get('scenes',[]) for l in (s.get('narration') or [{}]) if character(project,l)['id']==c['id']]
         if any(not l.get('audio') for l in lines):result.append('VOICEVOX:'+c.get('speaker','ずんだもん'))
-        if any(l.get('audio') for l in lines):result.append('外部音声:'+c.get('name',c['id']))
+        if any(l.get('audio') for l in lines):result.append(c.get('audioCredit') or '外部音声:'+c.get('name',c['id']))
         if c.get('art')=='zundamon':result.append('立ち絵:坂本アヒル')
         if c.get('art','').startswith('kitsune:'):result.append('立ち絵:きつね（仮）／東方Project二次創作')
         elif c.get('credit'):result.append(c['credit'])

@@ -64,6 +64,23 @@ AquesTalkは個人・非営利の無償利用と営利利用のライセンス�
 
 ## 検証
 
+### AquesTalkPlayerから音声を一括作成
+
+公式アプリにはCLIと「れいむ」「まりさ」のプリセットが同梱されている。2026-09-07、Windows版1.1.1.1で確認。両方ともAquesTalk1で、声種はf1/f2、棒読み、標準話速100。VOICEVOXの代替音声から、通常のゆっくり音声へ移す場合はこちらを使える。
+
+公式配布元：<https://www.a-quest.com/products/aquestalkplayer.html>、CLI仕様：<https://www.a-quest.com/products/aquestalkplayer_man.html>。
+
+このアプリの個人・非営利利用は無償。個人事業・会社・学校での利用、商用コンテンツ等は公式の条件に従い使用ライセンスを設定する。評価用SDKは発音制限があるため、本番音声に使わない。アプリ・DLLをリポジトリに同梱したり、アプリからDLLだけ取り出して独自に呼んだりしない。
+
+1. 公式ZIPをGit管理外のローカルフォルダーに展開する。
+2. `python prepare_yukkuri_audio.py SOURCE.json NEW.json --player PATH/TO/AquesTalkPlayer.exe`で別の台本を作る。
+3. 新台本の全セリフに外部WAVが付き、話者別の`audioCredit`にAquesTalk1が記録される。字幕・図解・間は元台本を維持する。
+4. 新音声で尺を確認し、新台本を`studio.py`へ渡して動画を再生成する。
+
+この一括変換は音声を持たない霊夢・魔理沙の2話者台本用。元ファイルや既存の改訂版は上書きしない。生成済みWAVを持つ台本は誤置換を避けて拒否する。字幕や読みを編集した後、`audio`が残っていると古いWAVが再生されるため、音声の再生成が必要。元の編集内容を引き継いだ新しいスナップショットから対象音声を更新すること。
+
+外部WAVは`direction.speed`では伸縮しない。AquesTalkPlayerのプリセットが合成時の速度を決める。話者の`speaker`は旧VOICEVOX設定が残っていても、`audio`があるセリフでは使わない。画面・クレジットは実際に使う`audioCredit`を優先する。
+
 `python -m unittest discover -s editor -p "test_*.py"`と`npm --prefix editor test`。
 実動画は`output/dialogue-board-check/demo.mp4`（3種類・2話者）と`output/solo-board-check/demo.mp4`（ずんだもん単独）を使った。
 元の教材の台本や動画には適用せず、検証用サンプルとして台本ノートに別途読み込んでいる。

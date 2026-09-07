@@ -19,3 +19,9 @@
 ユーザー指定のエクスポートを確認したコピーから、全編動画を生成した。完成尺19分59.67秒、1280×720・24fps、8チャプター、BGM「ほんわかぷっぷー」。ファイルはGit管理外の`output/epiplexity-20260907-final/epiplexity.mp4`。
 
 `finalize_video.py OUTPUT SCRIPT`は生成した動画にチャプターを付け、映像・音声の全編デコード、元台本と字幕・話者・図解タイミングの一致を確認する。今回の記録は`VIDEO_VALIDATION.json`。完成MP4の冒頭・中盤・終盤の抽出画像を目視確認した。発音の試聴は未実施。
+
+## ゆっくり音声差し替え版
+
+2026-09-07、ユーザーの希望によりAquesTalkPlayer公式同梱の「れいむ」「まりさ」（AquesTalk1 f1/f2、標準話速100）で全208セリフを生成。元台本の文章・章順・図解・間は維持した。完成尺は19分34.58秒。元のVOICEVOX版も保持。
+
+差し替え版：`output/epiplexity-20260907-yukkuri/epiplexity.mp4`。検証：`YUKKURI_VIDEO_VALIDATION.json`。台本ノートには「ゆっくり音声版」として別コピーを取り込んだ。音声再生成はルートの`prepare_yukkuri_audio.py`を使う。外部WAVの再生成に関する注意は`docs/DIALOGUE_BOARD.md`を参照。
