@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-07",
+  "scenes": 29,
+  "lines": 208,
+  "checks": [
+    "presentation schema",
+    "all caption layouts",
+    "all board states render",
+    "editor lossless round-trip"
+  ],
+  "duration": {
+    "seconds": 1199.666666666667,
+    "lowerSeconds": 1199.666666666667,
+    "upperSeconds": 1199.666666666667,
+    "cachedLines": 208,
+    "totalLines": 208,
+    "exact": true,
+    "pauseSeconds": 51.93999999999995,
+    "characters": 6505,
+    "targetSeconds": 1200,
+    "suggestedCharacters": 6507
+  },
+  "listened": false,
+  "fullVideoRendered": false,
+  "paperExperimentsReproduced": false,
+  "chapterTiming": {
+    "01 導入": {
+      "start": 0.0,
+      "end": 91.58333333333333
+    },
+    "02 情報量と圧縮の準備": {
+      "start": 91.58333333333333,
+      "end": 240.83333333333334
+    },
+    "03 Epiplexityの定義": {
+      "start": 240.83333333333334,
+      "end": 414.25
+    },
+    "04 実際にはどう測るか": {
+      "start": 414.25,
+      "end": 541.4166666666666
+    },
+    "05 3つの疑問を解く": {
+      "start": 541.4166666666666,
+      "end": 756.0416666666666
+    },
+    "06 チェスの実験": {
+      "start": 756.0416666666666,
+      "end": 934.7916666666666
+    },
+    "07 データ選択への応用": {
+      "start": 934.7916666666666,
+      "end": 1076.8333333333333
+    },
+    "08 限界と理解チェック": {
+      "start": 1076.8333333333333,
+      "end": 1199.6666666666667
+    }
+  },
+  "visualReview": "29場面のコンタクトシートを目視。全セリフの配置は共通描画関数で検証。",
+  "editorImportVerified": true
+}
