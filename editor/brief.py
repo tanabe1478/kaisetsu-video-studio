@@ -3,7 +3,8 @@ import math
 
 FIELDS={'topic':'テーマ','repository':'参考URL・リポジトリ','audience':'想定視聴者・前提知識',
         'structure':'希望する構成','focus':'詳しく扱うこと','avoid':'扱わないこと',
-        'style':'口調・説明スタイル','instructions':'その他の事前プロンプト'}
+        'style':'口調・説明スタイル','instructions':'その他の事前プロンプト',
+        'presentationMode':'解説形式','boardStyle':'黒板の図解'}
 
 def validate(b):
     if not isinstance(b,dict):raise ValueError('制作条件が不正です。')
@@ -21,7 +22,11 @@ def prompt(b):
     target=b.get('targetMinutes',0)
     lines.append(f'目標時間：{target:g}分（完成尺の目安）' if target else '目標時間：未指定。内容に応じて提案してください。')
     for k,label in FIELDS.items():
-        if b.get(k,'').strip():lines += ['',f'【{label}】',b[k].strip()]
+        if b.get(k,'').strip():
+            value=b[k].strip()
+            if k=='presentationMode':value={'solo':'1人解説（ずんだもん）','dialogue':'2人の掛け合い','yukkuri':'霊夢・魔理沙の掛け合い'}.get(value,value)
+            if k=='boardStyle':value={'none':'使わない','auto':'内容に合わせて図解','flow':'流れ・手順','comparison':'比較','relation':'関係'}.get(value,value)
+            lines += ['',f'【{label}】',value]
     lines += ['','【進め方】']
     if b.get('outlineFirst',True):
         lines += ['まず章立て・各章の時間配分・扱う要点を提案し、私の確認を待ってください。この段階では台本や動画は生成しないでください。']
@@ -31,5 +36,6 @@ def prompt(b):
               '指定内容と目標時間が両立しにくい場合は、省略・分割の案を示してください。',
               '台本作成時はmetaではなく台本JSONのトップレベルにtargetMinutesを保存し、制作条件もproductionBriefに保持してください。',
               'このプロジェクトの台本表記Skillを使い、リポジトリ題材ならdocs/REPOSITORY_LESSONS.mdに従って出典を残してください。',
+              '掛け合い・黒板の指定はdocs/DIALOGUE_BOARD.mdの形式で保存してください。話者ごとの音声・画像、セリフごとの図の表示数・強調を設定し、音声の種類も明記してください。',
               '既存の台本や編集内容は上書きしないでください。']
     return '\n'.join(lines)

@@ -2,6 +2,7 @@
 import hashlib, json, math, wave, time, urllib.request
 from pathlib import Path
 from direction import effective
+from presentation import voice_style, local_asset
 
 _engine=None
 _checked=0
@@ -17,18 +18,20 @@ def engine_info():
     return _engine
 
 def estimate(project,cache,engine=None):
-    style=None
-    if engine:
-        version,speakers=engine
-        style=next((s['id'] for speaker in speakers if speaker['name']==project.get('speaker','ずんだもん')
-                    for s in speaker['styles'] if s['name']==project.get('style','ノーマル')),None)
+    if engine:version,speakers=engine
     seconds=0;known=0;count=0;estimated_seconds=0;pause_seconds=0;characters=0
     for scene in project.get('scenes',[]):
         scene_seconds=0
         for line in scene.get('narration',[]) or ([{'text':scene['text']}] if scene.get('text') else []):
             if not line.get('text','').strip():continue
             count+=1;characters+=len(line['text']);d=effective(line,scene,project.get('speed',1));length=None
-            if style is not None:
+            style=voice_style(project,line,engine[1]) if engine else None
+            if line.get('audio'):
+                try:
+                    with wave.open(str(local_asset(line['audio']))) as f:length=f.getnframes()/f.getframerate()
+                    known+=1
+                except (ValueError,OSError,wave.Error,EOFError):pass
+            if style is not None and not line.get('audio'):
                 key=hashlib.sha256(json.dumps([line.get('speech',line['text']),style,d['speed'],version],ensure_ascii=False).encode()).hexdigest()
                 path=Path(cache)/(key+'.wav')
                 if path.is_file():

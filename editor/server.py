@@ -1,9 +1,9 @@
-"""Local script editor. No third-party packages or cloud service required."""
+"""Local script editor with shared offline video and diagram rendering."""
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 import argparse, copy, datetime, json, os, secrets, threading, uuid
-import math
+import math, io, base64
 import sys, subprocess
 import brief
 
@@ -12,6 +12,10 @@ ROOT = HERE.parent
 sys.path.insert(0,str(ROOT))
 from direction import suggest, validate_direction, EXPRESSIONS, POSES
 from duration import estimate, engine_info
+from presentation import validate_presentation, backdrop, draw_people, character
+from direction import effective
+from studio import scene_base, caption_frame
+from PIL import Image
 STORE = HERE / 'workspace'
 LOCK = threading.RLock()
 TOKEN = secrets.token_urlsafe(32)
@@ -80,6 +84,7 @@ def validate(p):
         ids.add(note['id'])
         if not isinstance(note.get('text'),str) or note.get('status') not in ('open','done') or not isinstance(note.get('target'),str):raise ValueError('フィードバックの形式が正しくありません。')
         if note['target']!='project':project_path(note['target'])
+    validate_presentation(script(p))
     return p
 
 def import_script(data, source='JSONファイル'):
@@ -209,6 +214,25 @@ class Handler(BaseHTTPRequestHandler):
                     prompt=brief.prompt(b);dest=folder/uid();dest.mkdir()
                     (dest/'brief.json').write_bytes(encoded(b));(dest/'prompt.md').write_text(prompt,encoding='utf-8')
                     return self.send(200,{'prompt':prompt,'directory':str(dest)})
+            if path=='/api/board-preview':
+                p=validate(data['project']);raw=script(p)
+                scene=next(s for c in p['chapters'] for s in c['scenes'] if s['id']==data['sceneId'])
+                rawscene={**scene['data'],'chapter':next(c['title'] for c in p['chapters'] if scene in c['scenes'])}
+                line=next((l for l in scene['lines'] if l['id']==data.get('lineId')),scene['lines'][0] if scene['lines'] else {})
+                modern=bool(rawscene.get('board') or raw.get('presentationMode')=='dialogue' or raw.get('characters'))
+                delivery=effective(line,rawscene,raw.get('speed',1))
+                if modern:
+                    im=backdrop(raw,rawscene,line=line)
+                    draw_people(im,raw,character(raw,line)['id'],delivery)
+                else:
+                    im=scene_base(raw,rawscene,0,1)
+                    path=ROOT/'assets'/'sprites'/f"{delivery['expression']}-{delivery['pose']}-0-0.png"
+                    if not path.exists():path=ROOT/'assets'/'previews'/f"{delivery['expression']}-{delivery['pose']}.png"
+                    sprite=Image.open(path).convert('RGBA').resize((425,780),Image.Resampling.LANCZOS)
+                    im.paste(sprite,(830,108),sprite)
+                caption_frame(im,line.get('text',''),character(raw,line).get('color','#ffffff') if modern else 'white')
+                buffer=io.BytesIO();im.save(buffer,format='PNG')
+                return self.send(200,{'image':'data:image/png;base64,'+base64.b64encode(buffer.getvalue()).decode()})
             if path=='/api/duration':
                 p=validate(data['project'])
                 return self.send(200,estimate(script(p),ROOT/'cache',engine_info()))

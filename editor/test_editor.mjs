@@ -132,3 +132,26 @@ test('custom brief minutes and mode survive reopening even at a preset duration'
  assert.equal(x.$('[data-length-scope="brief"]').value,'custom');assert.equal(x.$('[data-brief="targetMinutes"]').value,'5');
  assert.equal(x.$('#brief-length .custom-minutes').hidden,false);
 });
+
+test('dialogue identities and board cues survive editing, undo and export',async t=>{
+ const x=await setup(t);x.click('[data-select-project]');x.input('[data-presentation="mode"]','dialogue','change');
+ const ids=x.current().meta.characters.map(c=>c.id);assert.equal(ids.length,2);
+ x.click(`[data-select-scene="${key(3)}"]`);x.input('[data-dialogue="character"]',ids[1],'change');
+ x.input('[data-board="layout"]','flow','change');x.input('[data-board="nodes"]','A | 入力\nB | 出力');
+ x.input('[data-dialogue="boardStep"]','2','change');x.input('[data-dialogue="boardFocus"]','2','change');await x.flush();
+ const line=()=>x.current().chapters[0].scenes[0].lines[0];
+ assert.equal(line().character,ids[1]);assert.equal(line().boardFocus,2);
+ x.click('#undo');assert.equal(line().boardFocus,undefined);x.click('#redo');assert.equal(line().boardFocus,2);
+ x.click('#export');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.state.exported.chapters[0].scenes[0].data.board.nodes[1].detail,'出力');
+ assert.equal(x.state.exported.chapters[0].scenes[0].lines[0].text,'型の説明');
+});
+test('Kitsune preset preserves assigned character IDs and brief communicates the requested format',async t=>{
+ const x=await setup(t);x.click('[data-select-project]');x.input('[data-presentation="mode"]','dialogue','change');
+ const ids=x.current().meta.characters.map(c=>c.id);x.click('[data-cast-preset="yukkuri"]');
+ assert.deepEqual(x.current().meta.characters.map(c=>c.id),ids);assert.equal(x.current().meta.characters[0].art,'kitsune:reimu');
+ x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
+ x.input('[data-brief="presentationMode"]','yukkuri');x.input('[data-brief="boardStyle"]','auto');x.input('[data-brief="topic"]','検証');
+ x.click('#brief-generate');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.state.brief.presentationMode,'yukkuri');assert.equal(x.state.brief.boardStyle,'auto');
+});
