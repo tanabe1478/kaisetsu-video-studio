@@ -25,8 +25,12 @@ def prompt(b):
         if b.get(k,'').strip():
             value=b[k].strip()
             if k=='presentationMode':value={'solo':'1人解説（ずんだもん）','dialogue':'2人の掛け合い','yukkuri':'霊夢・魔理沙の掛け合い'}.get(value,value)
-            if k=='boardStyle':value={'none':'使わない','auto':'内容に合わせて図解','flow':'流れ・手順','comparison':'比較','relation':'関係'}.get(value,value)
+            if k=='boardStyle':value={'none':'使わない','auto':'AIが内容に合わせて図解・アニメーションを設計','flow':'流れ・手順','comparison':'比較','relation':'関係'}.get(value,value)
             lines += ['',f'【{label}】',value]
+    if b.get('boardStyle')!='none':
+        lines += ['','黒板の内容・配置・動きはAIが台本から設計してください。私による項目ごとの指定は不要です。',
+                  'docs/BOARD_ANIMATION.mdに沿って、分類・移動・圧縮・状態変化など、説明対象が理解できるアニメーションを作ってください。',
+                  '短い場面プレビューで確認できるようにし、模式図と実測値を区別してください。']
     lines += ['','【進め方】']
     if b.get('outlineFirst',True):
         lines += ['まず章立て・各章の時間配分・扱う要点を提案し、私の確認を待ってください。この段階では台本や動画は生成しないでください。']

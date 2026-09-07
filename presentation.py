@@ -53,6 +53,8 @@ def validate_presentation(project):
             if not isinstance(c.get(k,''),str) or len(c.get(k,''))>300:raise ValueError('話者設定は300文字以内の文字列です。')
         if not re.fullmatch(r'#[0-9a-fA-F]{6}',c.get('color','#bce88a')):raise ValueError('字幕色は#RRGGBBです。')
     for scene in project.get('scenes',[]):
+        from board_motion import validate as validate_motion
+        validate_motion(scene.get('boardAnimation'))
         validate_board(scene.get('board'))
         for line in scene.get('narration',[]):
             character(project,line)
@@ -103,14 +105,18 @@ def draw_board(im,board,heading,step=0,focus=0):
         fit_text(d,'↔',(620,280,40,45),'#f6de7a',28)
     d.line((279,514,323,514),fill='#ece8c4',width=4)
 
-def backdrop(project,scene,index=0,count=1,line=None):
+def backdrop(project,scene,index=0,count=1,line=None,motion_position=1.75):
     im=Image.new('RGB',(1280,720),'#f3f2e7');d=ImageDraw.Draw(im)
     d.rectangle((0,0,1280,7),fill='#264b40')
     fit_text(d,project.get('title','解説'),(40,23,1200,50),'#273d34',32)
     d.text((43,87),f'{index+1:02d}/{count:02d}  '+scene.get('chapter',''),font=font(16),fill='#557368')
     board=scene.get('board') or {'layout':'flow','nodes':[{'label':scene.get('heading','解説'),'detail':'\n'.join(scene.get('points',[]))[:60]}]}
     draw_board(im,board,scene.get('heading',''),(line or {}).get('boardStep',0),(line or {}).get('boardFocus',0))
-    if not scene.get('board'):
+    if scene.get('boardAnimation'):
+        from board_motion import draw, validate_alignment
+        validate_alignment(scene)
+        draw(im,scene['boardAnimation'],motion_position)
+    elif not scene.get('board'):
         d.rectangle((275,216,1005,499),fill='#193f38')
         if scene.get('code'):
             f=ImageFont.truetype('C:/Windows/Fonts/consola.ttf',22)

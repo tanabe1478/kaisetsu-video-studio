@@ -1,0 +1,17 @@
+{
+  "durationSeconds": 116.375,
+  "scenes": 3,
+  "fullVideoUpdated": false,
+  "fullPreviewAVDecode": "passed",
+  "allKeySampleLayouts": "passed",
+  "motionWithinSpeech": "passed",
+  "soloAndDialogue": "passed",
+  "pythonTests": 24,
+  "editorTests": 14,
+  "skillValidation": "passed",
+  "listened": false,
+  "browserStaticPreview": "passed",
+  "browserVideoReadyState": 4,
+  "previewVideo": "1:56.375",
+  "visualReview": "抽出画像で開始・終了状態を確認、文字の重なりを修正"
+}

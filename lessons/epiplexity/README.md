@@ -25,3 +25,9 @@
 2026-09-07、ユーザーの希望によりAquesTalkPlayer公式同梱の「れいむ」「まりさ」（AquesTalk1 f1/f2、標準話速100）で全208セリフを生成。元台本の文章・章順・図解・間は維持した。完成尺は19分34.58秒。元のVOICEVOX版も保持。
 
 差し替え版：`output/epiplexity-20260907-yukkuri/epiplexity.mp4`。検証：`YUKKURI_VIDEO_VALIDATION.json`。台本ノートには「ゆっくり音声版」として別コピーを取り込んだ。音声再生成はルートの`prepare_yukkuri_audio.py`を使う。外部WAVの再生成に関する注意は`docs/DIALOGUE_BOARD.md`を参照。
+
+## AIによる黒板アニメーションの試作
+
+3場面を抜粋し、反復データの集約、共通部分と残りの振り分け、学習曲線の描画を設計。`output/epiplexity-motion-final/demo.mp4`（1分56.375秒）で確認できる。台本ノートでは「黒板アニメーション試作：圧縮と学習」。元の20分動画は更新していない。
+
+`build_motion_example.py`はこの題材のAI作成絵コンテ。新しい台本の生成器ではなく、新しい内容については会話のAIが別途設計する。再生形式は`docs/BOARD_ANIMATION.md`、検証記録は`MOTION_VALIDATION.json`。

@@ -181,6 +181,8 @@ def render(project, base, out):
     if not project.get('scenes'): raise ValueError('scenes is empty')
     if not .5<=project.get('speed',1)<=2: raise ValueError('speed must be 0.5–2')
     for s in project['scenes']:
+        from board_motion import validate_alignment
+        validate_alignment(s)
         s.setdefault('expression','normal');s.setdefault('pose','normal')
         if s['expression'] not in EXPRESSIONS or s['pose'] not in POSES:raise ValueError('Unknown expression/pose')
         if s.get('narration'):
@@ -208,7 +210,7 @@ def render(project, base, out):
         try:
             for i,(item,audio) in enumerate(zip(timing,pcm)):
                 print(f'Rendering scene {i+1}/{len(timing)}',flush=True)
-                scene=item['scene'];modern=bool(scene.get('board') or project.get('presentationMode')=='dialogue' or project.get('characters'));bg=scene_base(project,scene,i,len(timing));captions=item['captions'];boards={}
+                scene=item['scene'];modern=bool(scene.get('boardAnimation') or scene.get('board') or project.get('presentationMode')=='dialogue' or project.get('characters'));bg=scene_base(project,scene,i,len(timing));captions=item['captions'];boards={}
                 for caption in captions:
                     subtitles.append(f'{len(subtitles)+1}\n{timestamp(item["start"]+caption["start"])} --> {timestamp(item["start"]+caption["end"])}\n{caption["text"]}\n')
                 for n in range(item['frames']):
@@ -219,8 +221,13 @@ def render(project, base, out):
                     active=next((c for c in reversed(captions) if c['start']<=t),captions[0])
                     if modern:
                         boardkey=(active['boardStep'],active['boardFocus'])
-                        if boardkey not in boards:boards[boardkey]=backdrop(project,scene,i,len(timing),active)
-                        im=boards[boardkey].copy();draw_people(im,project,active['character'],delivery,mouth,blink,images)
+                        if scene.get('boardAnimation'):
+                            position=captions.index(active)+1+min(1,max(0,(t-active['start'])/(active['end']-active['start'])))
+                            im=backdrop(project,scene,i,len(timing),active,motion_position=position)
+                        else:
+                            if boardkey not in boards:boards[boardkey]=backdrop(project,scene,i,len(timing),active)
+                            im=boards[boardkey].copy()
+                        draw_people(im,project,active['character'],delivery,mouth,blink,images)
                     else:
                         im=bg.copy();sprite=images[delivery['expression'],delivery['pose'],blink,mouth]
                         im.paste(sprite,(830,108),sprite)

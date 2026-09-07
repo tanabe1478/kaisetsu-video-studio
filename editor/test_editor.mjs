@@ -5,10 +5,11 @@ import {JSDOM} from 'jsdom';
 const html=await readFile(new URL('./static/index.html',import.meta.url),'utf8');
 const js=await readFile(new URL('./static/app.js',import.meta.url),'utf8');
 const key=n=>n.toString(16).padStart(32,'0');
-async function setup(t){
+async function setup(t,prepare=()=>{}){
  const p={format:'kaisetsu-outline-v1',id:key(1),revision:0,meta:{title:'教材',bgm:{path:'music.mp3'},repository:{url:'https://github.com/example/repository',commit:'a'.repeat(40)}},updatedAt:'now',feedback:[],chapters:[
  {id:key(2),title:'導入',scenes:[{id:key(3),data:{heading:'最初',code:'let x = 1',sources:[{path:'src/index.ts',startLine:10,endLine:20,note:'処理の入口'}]},lines:[{id:key(4),text:'型の説明',speech:'かたの説明',custom:42}]}]},
  {id:key(5),title:'応用',scenes:[]}]};
+ prepare(p);
  const dom=new JSDOM(html,{url:'http://127.0.0.1:8765',runScripts:'outside-only'}),w=dom.window;
  t.after(()=>w.close());w.structuredClone=structuredClone;w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
  const state={saved:p,conflict:false,downloads:[],exported:null};
@@ -31,6 +32,17 @@ async function setup(t){
  const flush=async()=>{w.document.dispatchEvent(new w.KeyboardEvent('keydown',{key:'s',ctrlKey:true,bubbles:true}));await new Promise(r=>setTimeout(r,20));};
  return {w,$,click,input,current,flush,state,registered};
 }
+test('AI animation hides manual node controls and survives user feedback and export',async t=>{
+ const animation={version:1,intent:'共通部分をまとめる',narration:['型の説明'],elements:[]};
+ const x=await setup(t,p=>{p.chapters[0].scenes[0].data.boardAnimation=structuredClone(animation);});
+ assert.match(x.$('#editor').textContent,/AIが設計した黒板アニメーション/);
+ assert.equal(x.$('[data-board="nodes"]'),null);
+ assert.equal(x.$('[data-dialogue="boardStep"]'),null);
+ x.input('[data-field="line-text"]','利用者が直した説明');await x.flush();
+ assert.deepEqual(x.state.saved.chapters[0].scenes[0].data.boardAnimation,animation);
+ assert.equal(x.state.saved.chapters[0].scenes[0].lines[0].text,'利用者が直した説明');
+});
+
 test('wording synchronizes narration, undo/redo restores pronunciation, metadata survives export',async t=>{
  const x=await setup(t);x.input('[data-field="line-text"]','<img src=x onerror=alert(1)>改訂');
  assert.equal(x.current().chapters[0].scenes[0].lines[0].speech,'<img src=x onerror=alert(1)>改訂');

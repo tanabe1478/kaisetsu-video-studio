@@ -219,10 +219,11 @@ class Handler(BaseHTTPRequestHandler):
                 scene=next(s for c in p['chapters'] for s in c['scenes'] if s['id']==data['sceneId'])
                 rawscene={**scene['data'],'chapter':next(c['title'] for c in p['chapters'] if scene in c['scenes'])}
                 line=next((l for l in scene['lines'] if l['id']==data.get('lineId')),scene['lines'][0] if scene['lines'] else {})
-                modern=bool(rawscene.get('board') or raw.get('presentationMode')=='dialogue' or raw.get('characters'))
+                rawscene['narration']=scene['lines']
+                modern=bool(rawscene.get('boardAnimation') or rawscene.get('board') or raw.get('presentationMode')=='dialogue' or raw.get('characters'))
                 delivery=effective(line,rawscene,raw.get('speed',1))
                 if modern:
-                    im=backdrop(raw,rawscene,line=line)
+                    im=backdrop(raw,rawscene,line=line,motion_position=(scene['lines'].index(line)+1.75) if line else 1)
                     draw_people(im,raw,character(raw,line)['id'],delivery)
                 else:
                     im=scene_base(raw,rawscene,0,1)
