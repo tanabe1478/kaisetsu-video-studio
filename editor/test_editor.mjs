@@ -175,3 +175,15 @@ test('Kitsune preset preserves assigned character IDs and brief communicates the
  x.click('#brief-generate');await new Promise(r=>setTimeout(r,20));
  assert.equal(x.state.brief.presentationMode,'yukkuri');assert.equal(x.state.brief.boardStyle,'auto');
 });
+
+test('reviewed kana is stored on the line and survives text edits for rechecking',async t=>{
+ const x=await setup(t);
+ x.input('[data-field="line-expected-kana"]','カタノセツメエ');
+ x.input('[data-field="line-text"]','変更した説明');await x.flush();
+ const scene=x.state.saved.chapters[0].scenes[0];
+ assert.equal(scene.lines[0].expectedKana,'カタノセツメエ');
+ assert.equal(scene.lines[0].speech,'変更した説明');
+ assert.equal(scene.data['xpected-kana'],undefined);
+ x.click('#export');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.state.exported.chapters[0].scenes[0].lines[0].expectedKana,'カタノセツメエ');
+});

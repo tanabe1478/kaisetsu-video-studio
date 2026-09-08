@@ -7,6 +7,7 @@ import requests
 import imageio_ffmpeg
 from PIL import Image, ImageDraw, ImageFont
 from psd_tools import PSDImage
+from pronunciation import validate_reading, check_query
 from audio_mix import prepare_audio
 from direction import effective
 from fonts import font
@@ -56,6 +57,12 @@ def api(base, route, **kwargs):
     r.raise_for_status(); return r
 
 def synthesize(project, base, out):
+    report_path=out/'pronunciation-report.json'
+    report_path.unlink(missing_ok=True)
+    # Fail before any synthesis, including when an old WAV is cached.
+    for scene in project['scenes']:
+        for segment in scene.get('narration',[]):validate_reading(segment)
+    reading_report=[]
     needs_engine=any(not seg.get('audio') for scene in project['scenes'] for seg in (scene.get('narration') or [{}]))
     if needs_engine:
         version = requests.get(base + '/version',timeout=5); version.raise_for_status()
@@ -74,7 +81,18 @@ def synthesize(project, base, out):
             style=voice_style(project,segment,available)
             if style is None and not segment.get('audio'):raise ValueError(f'VOICEVOXの話者・スタイルが見つかりません: {person}')
             delivery=effective(segment,scene,project['speed'])
-            key = hashlib.sha256(json.dumps([spoken,style,delivery['speed'],engine_version],ensure_ascii=False).encode()).hexdigest()
+            query=None
+            identity=[spoken,style,delivery['speed'],engine_version]
+            if segment.get('expectedKana') and not segment.get('audio'):
+                query=api(base,'/audio_query',params={'text':spoken,'speaker':style}).json()
+                try: result=check_query(segment,query)
+                except ValueError as exc:
+                    (out/'pronunciation-report.json').write_text(json.dumps({'status':'failed','scene':index+1,'error':str(exc)},ensure_ascii=False,indent=2))
+                    raise
+                reading_report.append({'scene':index+1,'line':len(captions)+1,**result})
+                # A changed dictionary/query must not reuse an older pronunciation.
+                identity.extend([segment['expectedKana'],query])
+            key = hashlib.sha256(json.dumps(identity,ensure_ascii=False).encode()).hexdigest()
             path = cache / (key + '.wav')
             if segment.get('audio'):
                 external=local_asset(segment['audio'])
@@ -82,7 +100,7 @@ def synthesize(project, base, out):
                 data=subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(),'-v','error','-protocol_whitelist','file,pipe','-i',str(external),'-f','s16le','-ac','1','-ar',str(sample_rate),'-'],capture_output=True,check=True).stdout
                 part=np.frombuffer(data,dtype='<i2').copy()
             elif not path.exists():
-                query = api(base,'/audio_query',params={'text':spoken,'speaker':style}).json()
+                if query is None:query = api(base,'/audio_query',params={'text':spoken,'speaker':style}).json()
                 query.update(speedScale=delivery['speed'],outputSamplingRate=sample_rate,outputStereo=False)
                 data = api(base,'/synthesis',params={'speaker':style},json=query).content
                 with wave.open(io.BytesIO(data)) as f:
@@ -105,6 +123,7 @@ def synthesize(project, base, out):
     with wave.open(str(out/'narration.wav'),'wb') as f:
         f.setnchannels(1);f.setsampwidth(2);f.setframerate(sample_rate);f.writeframes(joined.tobytes())
     (out/'timeline.json').write_text(json.dumps(timings,ensure_ascii=False,indent=2),encoding='utf-8')
+    (out/'pronunciation-report.json').write_text(json.dumps({'status':'passed','checkedLines':reading_report,'scope':'expectedKanaを指定した合成音声のみ。聴感確認は別工程。'},ensure_ascii=False,indent=2))
     return timings,all_pcm,sample_rate
 
 def wrap(text, f, width):

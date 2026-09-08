@@ -4,7 +4,7 @@ Remotion 4.0.522 / React 19.1.1 / SVG。既存の場面8（39.75秒、6セリフ
 
 ## 完全版
 
-最新版は `output/prompt-caching-remotion-full-20260908-v2/demo.mp4`。30場面・180セリフ・10章。元の音声・字幕・台本の文言と間を保持する。全編の演出は `src/full.tsx`、先頭一致の比較は `src/prefix.tsx` を共用する。
+最新版は `output/prompt-caching-remotion-full-20260908-v3/demo.mp4`（20分2.875秒）。「十分」の読み2箇所を修正した。[読みの確認記録](../docs/PRONUNCIATION_REVIEW.md)。30場面・180セリフ・10章。元の音声・字幕・台本の文言と間を保持する。全編の演出は `src/full.tsx`、先頭一致の比較は `src/prefix.tsx` を共用する。
 
 ```sh
 .venv/bin/python motion/prepare_full.py output/full-new
@@ -61,3 +61,13 @@ AI自身が描画画像に加え、完成MP4から抽出した14時点の画像�
 音声はVOICEVOX:四国めたん／ずんだもん。模式図であり、実API測定値ではない。出典は`lessons/prompt-caching-pi/SOURCES.md`と生成元スナップショットを引き継ぐ。このソースコードをエディターに入力された任意コードとして実行する経路は追加していない。
 
 2026-09-08に確認した資料：[Remotion renderMedia](https://www.remotion.dev/docs/renderer/render-media)、[renderStill](https://www.remotion.dev/docs/renderer/render-still)、[ライセンス](https://www.remotion.dev/license)。今回の個人利用はFree Licenseの対象。npmのlockfileでバージョンを固定し、Remotionランタイム・Chromium・生成動画はGit管理外に置く。
+
+## 音声用表記を改訂する場合
+
+元の編集データを残して改訂台本JSONを作り、次の経路で音声とタイムラインから再生成する。旧音声を固定して使う `prepare_full.py` とは区別する。
+
+```sh
+.venv/bin/python motion/prepare_revision.py output/revised-script.json output/revised-full
+.venv/bin/python motion/reading_samples.py output/revised-full
+node motion/render_full.mjs output/revised-full
+```
