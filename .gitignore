@@ -8,3 +8,9 @@ target/
 .mooncakes/
 editor/workspace/
 editor/node_modules/
+
+motion/node_modules/
+motion/public/
+motion/.bundle/
+
+.remotion/

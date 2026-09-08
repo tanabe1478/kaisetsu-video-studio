@@ -1,0 +1,90 @@
+{
+  "durationInFrames": 954,
+  "fps": 24,
+  "captions": [
+    {
+      "text": "次はA、B、CのBだけをXに変える。Cは同じだから再利用できる？",
+      "start": 0.0,
+      "end": 6.848,
+      "direction": {
+        "speed": 1,
+        "pause": 0.25,
+        "expression": "thinking",
+        "pose": "think"
+      },
+      "character": "host",
+      "boardStep": 1,
+      "boardFocus": 1
+    },
+    {
+      "text": "同じCでも、前がA、Bだった場合とA、Xだった場合では文脈が違う。元の続きとしては扱えない。",
+      "start": 7.098,
+      "end": 17.146,
+      "direction": {
+        "speed": 1,
+        "pause": 0.18,
+        "expression": "normal",
+        "pose": "point"
+      },
+      "character": "guide",
+      "boardStep": 1,
+      "boardFocus": 1
+    },
+    {
+      "text": "元の候補はAまでなんだね。",
+      "start": 17.326,
+      "end": 19.384666666666668,
+      "direction": {
+        "speed": 1,
+        "pause": 0.25,
+        "expression": "thinking",
+        "pose": "think"
+      },
+      "character": "host",
+      "boardStep": 2,
+      "boardFocus": 2
+    },
+    {
+      "text": "うん。先頭一致の仕組みでは、変更点より後ろの文字だけ同じでも、以前の計算には戻れない。",
+      "start": 19.634666666666668,
+      "end": 28.498666666666665,
+      "direction": {
+        "speed": 1,
+        "pause": 0.18,
+        "expression": "normal",
+        "pose": "point"
+      },
+      "character": "guide",
+      "boardStep": 2,
+      "boardFocus": 2
+    },
+    {
+      "text": "先頭への日付追加も影響するね。",
+      "start": 28.67866666666667,
+      "end": 31.356,
+      "direction": {
+        "speed": 1,
+        "pause": 0.25,
+        "expression": "thinking",
+        "pose": "think"
+      },
+      "character": "host",
+      "boardStep": 3,
+      "boardFocus": 3
+    },
+    {
+      "text": "だから、固定の説明は前、毎回変わる情報は後ろ、という配置が基本になるんだ。",
+      "start": 31.606,
+      "end": 38.955333333333336,
+      "direction": {
+        "speed": 1,
+        "pause": 0.18,
+        "expression": "normal",
+        "pose": "point"
+      },
+      "character": "guide",
+      "boardStep": 3,
+      "boardFocus": 3
+    }
+  ]
+}

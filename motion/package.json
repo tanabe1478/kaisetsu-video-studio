@@ -1,0 +1,1 @@
+{"name":"kaisetsu-motion","private":true,"type":"module","scripts":{"studio":"remotion studio src/index.tsx","render":"node render.mjs","test":"node --test state.test.mjs"},"dependencies":{"@remotion/bundler":"4.0.522","@remotion/cli":"4.0.522","@remotion/renderer":"4.0.522","react":"19.1.1","react-dom":"19.1.1","remotion":"4.0.522"}}
