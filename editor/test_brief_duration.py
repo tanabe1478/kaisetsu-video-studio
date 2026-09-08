@@ -9,7 +9,17 @@ class BriefDurationTests(unittest.TestCase):
         p=brief.prompt(b)
         self.assertIn('目標時間：5分',p);self.assertIn(b['structure'],p);self.assertIn('確認を待って',p)
         b['outlineFirst']=False;self.assertNotIn('確認を待って',brief.prompt(b))
+        self.assertIn('音声付き本編MP4まで',brief.prompt(b))
+        self.assertNotIn('動画生成は別途',brief.prompt(b))
+        b['deliverable']='script'
         self.assertIn('台本JSONまで',brief.prompt(b))
+        self.assertNotIn('MP4まで生成',brief.prompt(b))
+    def test_default_finishes_with_video_and_explicit_outline_still_waits(self):
+        p=brief.prompt({'topic':'検証'})
+        self.assertIn('全編デコード',p);self.assertNotIn('確認を待って',p)
+        p=brief.prompt({'topic':'検証','outlineFirst':True})
+        self.assertIn('確認を待って',p);self.assertIn('構成の承認後',p)
+        with self.assertRaises(ValueError):brief.validate({'deliverable':'unknown'})
     def test_invalid_conditions(self):
         for value in [-1,121,float('nan'),True,'5']:
             with self.assertRaises(ValueError):brief.validate({'targetMinutes':value})

@@ -107,10 +107,18 @@ test('brief conditions survive reopening and generate a request',async t=>{
  const x=await setup(t);x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
  x.input('[data-brief="topic"]','同期の仕組み');x.input('[data-length-scope="brief"]','short','change');x.input('[data-brief="structure"]','導入、例、まとめ');
  x.click('#brief-generate');await new Promise(r=>setTimeout(r,20));
- assert.equal(x.state.brief.targetMinutes,5);assert.equal(x.state.brief.outlineFirst,true);
+ assert.equal(x.state.brief.targetMinutes,5);assert.equal(x.state.brief.outlineFirst,false);assert.equal(x.state.brief.deliverable,'video');
  assert.match(x.$('#brief-prompt').value,/同期の仕組み 5分/);assert.equal(x.$('#brief-result').hidden,false);
  x.click('[data-close="brief-dialog"]');x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
  assert.equal(x.$('[data-brief="structure"]').value,'導入、例、まとめ');
+});
+test('script-only deliverable and explicit outline approval survive reopening',async t=>{
+ const x=await setup(t);x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
+ x.input('[data-brief="deliverable"]','script','change');x.click('[data-brief="outlineFirst"]');
+ x.input('[data-brief="topic"]','台本のみ');x.click('#brief-generate');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.state.brief.deliverable,'script');assert.equal(x.state.brief.outlineFirst,true);
+ x.click('[data-close="brief-dialog"]');x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.$('[data-brief="deliverable"]').value,'script');assert.equal(x.$('[data-brief="outlineFirst"]').checked,true);
 });
 test('target duration is saved and included in revision handoff',async t=>{
  const x=await setup(t);x.click('[data-select-project]');x.input('[data-field="project-targetMinutes"]','5');await x.flush();

@@ -195,6 +195,7 @@ def render(project, base, out):
         if not s.get('board') and (len(s.get('points',[]))>3 or any(font(24).getlength(p)>675 for p in s.get('points',[]))):raise ValueError('Use up to 3 short points per scene')
         if len(wrap(s['heading'],font(31),715))>2:raise ValueError('Heading too long')
     out.mkdir(parents=True,exist_ok=True)
+    if (out/'delivery.json').exists():(out/'delivery.json').unlink()
     timing,pcm,rate=synthesize(project,base,out)
     audio_path=prepare_audio(project,ROOT,out)
     print('Preparing PSD expressions...',flush=True);images=sprites([{'expression':'normal','pose':'normal'}]+[effective(seg,s,project['speed']) for s in project['scenes'] for seg in (s.get('narration') or [{}])]) if any(c.get('art')=='zundamon' for c in cast(project)) else {}
@@ -250,7 +251,9 @@ def render(project, base, out):
     if project.get('bgm'):
         music=project['bgm'];credit_lines.append('BGM: '+music.get('title','')+' / '+music.get('creator','')+' / '+music.get('source',''))
     (out/'CREDITS.txt').write_text('\n'.join(credit_lines),encoding='utf-8')
-    print(f'Created {out / "demo.mp4"} ({timing[-1]["end"]:.2f}s)',flush=True)
+    from verify_video import verify
+    delivery=verify(out)
+    print(f'Verified {out / "demo.mp4"} ({delivery["seconds"]:.2f}s)',flush=True)
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('script',nargs='?',default=str(ROOT/'demo.json'));parser.add_argument('--engine',default='http://localhost:50021');parser.add_argument('--output',default=str(ROOT/'output'))
