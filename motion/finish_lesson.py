@@ -28,10 +28,10 @@ buttons = ''.join(f'<button data-time="{c["start"]}">{html.escape(c["name"])}</b
 page = '''<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>__TITLE__</title>
 <style>body{margin:28px auto;max-width:1200px;padding:0 24px;background:#f6f3e9;color:#173d35;font:17px system-ui}video{width:100%;border-radius:14px;background:#173d35}button{padding:12px;margin:5px;border:1px solid #819c8c;border-radius:8px;background:white;color:#173d35;cursor:pointer;text-align:left}h1{font-size:28px}.chapters{display:grid;grid-template-columns:1fr 1fr}small{color:#50675d}</style>
 <h1>__TITLE__</h1><p>音声付き完全版 · __DURATION__ · __SCENES__場面 · 2人の掛け合い</p>
-<video controls preload="metadata" src="demo.mp4"></video><p id="time">動画を読み込み中…</p><div class="chapters">__BUTTONS__</div>
+<video controls playsinline preload="auto" src="demo.mp4"></video><p id="time">動画を読み込み中…</p><div class="chapters">__BUTTONS__</div>
 <p><a href="demo.mp4" download>完全版MP4</a> · <a href="script.json" download>台本JSON</a> · <a href="subtitles.srt" download>字幕SRT</a> · <a href="SOURCES.md">出典と確認範囲</a> · <a href="preview.mp4">計算例の短い場面</a></p>
 <small>VOICEVOX：四国めたん・ずんだもん。論文報告値と独自の模式図を画面で区別しています。</small>
-<script>const v=document.querySelector('video'),status=document.querySelector('#time');fetch('demo.mp4').then(r=>{if(!r.ok)throw Error('動画の取得に失敗しました');return r.blob()}).then(b=>{v.src=URL.createObjectURL(b);status.textContent='再生できます'}).catch(e=>status.textContent=e.message);document.querySelectorAll('[data-time]').forEach(b=>b.onclick=()=>{v.pause();v.currentTime=Number(b.dataset.time)});v.ontimeupdate=()=>status.textContent=Math.floor(v.currentTime/60)+':'+String(Math.floor(v.currentTime)%60).padStart(2,'0')+' / __DURATION__';</script></html>'''
+<script>const v=document.querySelector('video'),status=document.querySelector('#time');v.addEventListener('loadeddata',()=>status.textContent='再生できます');v.addEventListener('error',()=>status.textContent='動画を読み込めません：'+(v.error?.message||'再読み込みしてください'));document.querySelectorAll('[data-time]').forEach(b=>b.onclick=()=>{v.pause();v.currentTime=Number(b.dataset.time)});v.ontimeupdate=()=>status.textContent=Math.floor(v.currentTime/60)+':'+String(Math.floor(v.currentTime)%60).padStart(2,'0')+' / __DURATION__';</script></html>'''
 for old, new in [('__TITLE__', title), ('__DURATION__', duration), ('__SCENES__', str(len(timeline))), ('__BUTTONS__', buttons)]:
     page = page.replace(old, new)
 (out / 'index.html').write_text(page)

@@ -40,3 +40,7 @@ node motion/render_lesson.mjs output/slopcodebench-new
 音声合成用のspeechだけを修正し、行数、値、同じ表、割るの読みを補正。確認した3セリフはexpectedKanaによる再生成時の照合を保存した。聴感の全編レビューとは区別する。
 
 最終成果物はoutput/slopcodebench-full-20260912-v3。Gitには動画・音声・個人用エディターコピーを含めない。
+
+## ローカル再生
+
+` .venv/bin/python motion/serve_lesson.py output/slopcodebench-full-20260912-v3 --port 8767` で配信する。Range対応サーバーでMP4を直接再生し、全編のBlob化は行わない。
