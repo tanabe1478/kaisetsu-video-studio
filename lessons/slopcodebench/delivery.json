@@ -1,0 +1,26 @@
+{
+  "status": "verified",
+  "video": "/Users/tanabe.nobuyuki/Documents/repositories/kaisetsu-video-studio/output/slopcodebench-full-20260912-v3/demo.mp4",
+  "bytes": 47880718,
+  "sha256": "56cf5b6bee3baada4f28486ba691ebae6c6375fcb7182f507bb41c291c277cf6",
+  "seconds": 1959.166667,
+  "timelineSeconds": 1959.1666666666667,
+  "scenes": 36,
+  "captions": 216,
+  "chapters": 12,
+  "audioRmsDb": -26.482116451563428,
+  "checks": [
+    "video_and_audio_full_decode",
+    "duration_matches_timeline",
+    "video_frame_count",
+    "audio_duration",
+    "caption_times",
+    "caption_count",
+    "chapter_times",
+    "non_silent_audio",
+    "credits_present"
+  ],
+  "visualListeningReview": "別途記録。自動検証では発音や図の意味を判定しない。",
+  "verifiedAt": "2026-09-12T10:56:37.370284+00:00",
+  "scriptSha256": "8a83a006623ba410d15e3b1025f53921d457e8fd1887111206f510bb55f92f61"
+}

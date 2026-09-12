@@ -1,0 +1,4742 @@
+{
+  "title": "SlopCodeBench：コードは反復でどう劣化するのか",
+  "targetMinutes": 30,
+  "speed": 1,
+  "presentationMode": "dialogue",
+  "renderBackend": "remotion",
+  "motionComposition": "SlopCodeBench",
+  "productionBrief": {
+    "topic": "SlopCodeBenchの論文と公開実装を深く理解する",
+    "targetMinutes": 30,
+    "audience": "コーディングエージェントを使う開発者",
+    "presentationMode": "dialogue",
+    "boardStyle": "auto",
+    "outlineFirst": false,
+    "deliverable": "video",
+    "instructions": "2026-09-12ユーザー承認。約30分、2人の掛け合い、Remotion図解、音声付き完全版まで。論文v1/v2と現在の実装を区別する。",
+    "referenceUrls": [
+      "https://www.scbench.ai/",
+      "https://arxiv.org/html/2603.24755v2",
+      "https://scrapbox.io/tanabe-paper-reading/SlopCodeBench：長期反復タスクでコーディングエージェントのコード劣化を測る"
+    ]
+  },
+  "repository": {
+    "url": "https://github.com/SprocketLab/slop-code-bench",
+    "commit": "06b5c0687d4c05ee502e9696a4d0c22fc1eec5e0",
+    "kind": "静的解析",
+    "checkedAt": "2026-09-12"
+  },
+  "characters": [
+    {
+      "id": "host",
+      "name": "質問役",
+      "speaker": "四国めたん",
+      "style": "ノーマル",
+      "art": "avatar",
+      "color": "#efb4bd",
+      "credit": "自作SVG",
+      "audioCredit": "VOICEVOX:四国めたん"
+    },
+    {
+      "id": "guide",
+      "name": "解説役",
+      "speaker": "ずんだもん",
+      "style": "ノーマル",
+      "art": "avatar",
+      "color": "#b7eb93",
+      "credit": "自作SVG",
+      "audioCredit": "VOICEVOX:ずんだもん"
+    }
+  ],
+  "scenes": [
+    {
+      "chapter": "1 問いと資料の版",
+      "heading": "テストに通った、その次は？",
+      "pause": 0.8,
+      "board": {
+        "layout": "flow",
+        "nodes": [
+          {
+            "label": "最初の仕様",
+            "detail": ""
+          },
+          {
+            "label": "自分の実装",
+            "detail": ""
+          },
+          {
+            "label": "次の仕様",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "carry",
+        "nodes": [
+          "最初の仕様",
+          "自分の実装",
+          "次の仕様"
+        ],
+        "footer": "動くことと、変更しやすいことは別々に観測する",
+        "intent": "テストに通った、その次は？",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "動くことと、変更しやすいことは別々に観測する",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S1",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "最初は便利でも、機能追加を重ねると直しづらくなることがあるよね。",
+          "speech": "最初は便利でも、機能追加を重ねると直しづらくなることがあるよね。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "今回のSlopCodeBenchは、その変化を調べる研究だよ。完成品を一度採点するだけでなく、自分のコードを繰り返し拡張させるんだ。",
+          "speech": "今回のスロップコードベンチは、その変化を調べる研究だよ。完成品を一度採点するだけでなく、自分のコードを繰り返し拡張させるんだ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "テストが通っていても、順調とは限らないんだね。",
+          "speech": "テストが通っていても、順調とは限らないんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。現在の仕様を満たすかと、内部に複雑さや重複が蓄積しているかは別の観測だ。両方を時間に沿って見るのが特徴だよ。",
+          "speech": "そう。現在の仕様を満たすかと、内部に複雑さや重複が蓄積しているかは別の観測だ。両方を時間に沿って見るのが特徴だよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "順位だけでなく、測定の仕掛けまで知りたいな。",
+          "speech": "順位だけでなく、測定の仕掛けまで知りたいな。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "評価の流れ、具体的な問題、指標の計算、結果の限界、公開コードの順に確認しよう。図の独自例と、論文の報告値は分けて示すよ。",
+          "speech": "評価の流れ、具体的な問題、指標の計算、結果の限界、公開コードの順に確認しよう。図の独自例と、論文の報告値は分けて示すよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "1 問いと資料の版",
+      "heading": "v1・v2・現在のサイトを分ける",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "v1：20問題・93段階",
+            "detail": ""
+          },
+          {
+            "label": "v2：36問題・196段階",
+            "detail": ""
+          },
+          {
+            "label": "サイト：更新される値",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "compare",
+        "nodes": [
+          "v1：20問題・93段階",
+          "v2：36問題・196段階",
+          "サイト：更新される値"
+        ],
+        "footer": "数字には版と評価条件を添える",
+        "intent": "v1・v2・現在のサイトを分ける",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "数字には版と評価条件を添える",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S1",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "メモは20問題、93段階。サイトと数が違うね。",
+          "speech": "メモは20問題、93段階。サイトと数が違うね。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そのメモは2026年3月の論文v1を扱っている。5月のv2では、36問題、196チェックポイントへ拡張されているんだ。",
+          "speech": "そのメモは2026年3月の論文バージョンいちを扱っている。5月のバージョンにでは、36問題、196チェックポイントへ拡張されているんだ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "参照する版を確認する必要があるんだね。",
+          "speech": "参照する版を確認する必要があるんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。主な結果はv2を基準に説明し、v1との違いも明示する。さらに公式サイトの順位は更新されるから、固定された論文とは分けるよ。",
+          "speech": "そう。主な結果はバージョンにを基準に説明し、バージョンいちとの違いも明示する。さらに公式サイトの順位は更新されるから、固定された論文とは分けるよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "モデル数も、メモと論文とサイトで違っていたね。",
+          "speech": "モデル数も、メモと論文とサイトで違っていたね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "調査日は2026年9月12日。版、対象、実験条件をそろえて読むことが大切だ。異なる表の数字を、同じ実験の続きとして混ぜないようにしよう。",
+          "speech": "調査日は2026年9月12日。版、対象、実験条件をそろえて読むことが大切だ。異なる表の数字を、同じ実験の続きとして混ぜないようにしよう。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "1 問いと資料の版",
+      "heading": "3種類の根拠を見分ける",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "論文の報告",
+            "detail": ""
+          },
+          {
+            "label": "固定した公開実装",
+            "detail": ""
+          },
+          {
+            "label": "この動画の説明例",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "compare",
+        "nodes": [
+          "論文の報告",
+          "固定した公開実装",
+          "この動画の説明例"
+        ],
+        "footer": "再実験の成績ではない",
+        "intent": "3種類の根拠を見分ける",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "再実験の成績ではない",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S1",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "図やコードは、全部、実験をやり直して得たものなの？",
+          "speech": "図やコードは、全部、実験をやり直して得たものなの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "違うよ。論文の数値は著者らの報告。公開実装はコミットを固定して読んだ内容。そして理解のために作る小さな例は、こちらの独自例だ。",
+          "speech": "違うよ。論文の数値は著者らの報告。公開実装はコミットを固定して読んだ内容。そして理解のために作る小さな例は、こちらの独自例だ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "説明用の図だけでは、改善効果の証拠にはならないね。",
+          "speech": "説明用の図だけでは、改善効果の証拠にはならないね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その区別が重要だよ。この動画ではモデルを大量に走らせる再評価はしていない。計算例は算術を検証し、実装については該当箇所を出典に残す。",
+          "speech": "その区別が重要だよ。この動画ではモデルを大量に走らせる再評価はしていない。計算例は算術を検証し、実装については該当箇所を出典に残す。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "図にも、根拠の種類が表示されるんだね。",
+          "speech": "図にも、根拠の種類が表示されるんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。結果を見る前に、根拠の種類をそろえる。この研究を、自分の開発環境へ過大に一般化しないための準備でもあるんだ。",
+          "speech": "うん。結果を見る前に、根拠の種類をそろえる。この研究を、自分の開発環境へ過大に一般化しないための準備でもあるんだ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "2 評価の仕組み",
+      "heading": "持ち越すのは、自分の作業ディレクトリ",
+      "pause": 0.8,
+      "board": {
+        "layout": "flow",
+        "nodes": [
+          {
+            "label": "仕様1＋空の作業場",
+            "detail": ""
+          },
+          {
+            "label": "実装1を保存",
+            "detail": ""
+          },
+          {
+            "label": "仕様2＋実装1",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "carry",
+        "nodes": [
+          "仕様1＋空の作業場",
+          "実装1を保存",
+          "仕様2＋実装1"
+        ],
+        "footer": "会話・セッションはリセット／コードは継承",
+        "intent": "持ち越すのは、自分の作業ディレクトリ",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "会話・セッションはリセット／コードは継承",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "長期評価とは、長い会話を続けることなの？",
+          "speech": "長期評価とは、長い会話を続けることなの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "ここで中心になるのは会話の長さではなく、設計の持ち越しだよ。最初は空の作業場で実装し、次の段階では自分の前回コードを引き継ぐ。",
+          "speech": "ここで中心になるのは会話の長さではなく、設計の持ち越しだよ。最初は空の作業場で実装し、次の段階では自分の前回コードを引き継ぐ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "会話に書いた方針を、ずっと覚えている設定ではないんだね。",
+          "speech": "会話に書いた方針を、ずっと覚えている設定ではないんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "各チェックポイントは新しい環境で進め、会話履歴やエージェントのセッションは持ち越さない。論文では作業ディレクトリだけが継続する。",
+          "speech": "各チェックポイントは新しい環境で進め、会話履歴やエージェントのセッションは持ち越さない。論文では作業ディレクトリだけが継続する。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "設計の意味を、コードから読み取る必要があるわけだ。",
+          "speech": "設計の意味を、コードから読み取る必要があるわけだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。新しい仕様と、過去の判断が埋まったコードが次の入力になる。これは、会話の記憶容量だけでなく、成果物の構造を試す設計なんだ。",
+          "speech": "そう。新しい仕様と、過去の判断が埋まったコードが次の入力になる。これは、会話の記憶容量だけでなく、成果物の構造を試す設計なんだ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "2 評価の仕組み",
+      "heading": "外側の契約だけを渡す",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "CLI / API の入出力",
+            "detail": ""
+          },
+          {
+            "label": "内部の設計は自由",
+            "detail": ""
+          },
+          {
+            "label": "採点用テストは非公開",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "boundary",
+        "nodes": [
+          "CLI / API の入出力",
+          "内部の設計は自由",
+          "採点用テストは非公開"
+        ],
+        "footer": "内部構造をテストから教えない",
+        "intent": "外側の契約だけを渡す",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "内部構造をテストから教えない",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "実装が自由でも、何を作れば正解か分かるの？",
+          "speech": "実装が自由でも、何を作れば正解か分かるの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "外部から見える契約は具体的に指定する。引数、入力形式、出力形式、エラー時の振る舞いなどだ。一方で、関数名や内部のクラス構成は指定しない。",
+          "speech": "外部から見える契約は具体的に指定する。引数、入力形式、出力形式、エラー時の振る舞いなどだ。一方で、関数名や内部のクラス構成は指定しない。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "テストから内部設計のヒントが漏れる場合もあるよね。",
+          "speech": "テストから内部設計のヒントが漏れる場合もあるよね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "だから採点用テストと、その採点結果はエージェントに見せない。仕様の説明と例から実装する。自分で検査を作ることとは別の話だよ。",
+          "speech": "だから採点用テストと、その採点結果はエージェントに見せない。仕様の説明と例から実装する。自分で検査を作ることとは別の話だよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "非公開テストには、設計の自由を守る目的があるんだ。",
+          "speech": "非公開テストには、設計の自由を守る目的があるんだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。ただし実務のCIやレビューとは条件が違う。その違いは欠点を隠すためでなく、結果をどこまで一般化できるか考えるために覚えておこう。",
+          "speech": "そう。ただし実務のシーアイやレビューとは条件が違う。その違いは欠点を隠すためでなく、結果をどこまで一般化できるか考えるために覚えておこう。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "2 評価の仕組み",
+      "heading": "難問の連鎖をどう作ったか",
+      "pause": 0.8,
+      "board": {
+        "layout": "flow",
+        "nodes": [
+          {
+            "label": "人が問題を提案",
+            "detail": ""
+          },
+          {
+            "label": "仕様とテストを検証",
+            "detail": ""
+          },
+          {
+            "label": "別の著者がレビュー",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "steps",
+        "nodes": [
+          "人が問題を提案",
+          "仕様とテストを検証",
+          "別の著者がレビュー"
+        ],
+        "footer": "v2：36問題／196チェックポイント",
+        "intent": "難問の連鎖をどう作ったか",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "v2：36問題／196チェックポイント",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "問題は実際の修正履歴を、そのまま使っているの？",
+          "speech": "問題は実際の修正履歴を、そのまま使っているの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "論文では著者が手作業で問題を作った。新規の課題や既存ソフトに着想を得た課題を、設計判断が試される段階へ分けているよ。",
+          "speech": "論文では著者が手作業で問題を作った。新規の課題や既存ソフトに着想を得た課題を、設計判断が試される段階へ分けているよ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "細かく分割しただけでは、設計の判断を試せないね。",
+          "speech": "細かく分割しただけでは、設計の判断を試せないね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "提案段階では設計を試さない問題などを除き、検証段階ではテストを書いてエージェントにも試させ、曖昧な仕様を修正したと説明している。",
+          "speech": "提案段階では設計を試さない問題などを除き、検証段階ではテストを書いてエージェントにも試させ、曖昧な仕様を修正したと説明している。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "解けないように作っただけという理解は違うんだね。",
+          "speech": "解けないように作っただけという理解は違うんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "ただし、難しい問題を選んだ人工的な評価集合ではある。実務全体から無作為抽出した作業ではないので、この合格率を普段の成功確率と同一視はできないよ。",
+          "speech": "ただし、難しい問題を選んだ人工的な評価集合ではある。実務全体から無作為抽出した作業ではないので、この合格率を普段の成功確率と同一視はできないよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "3 具体例：コード検索",
+      "heading": "最初は文字列検索でも、契約は細かい",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "scan(root, rules)",
+            "detail": ""
+          },
+          {
+            "label": "exact / regex → JSONL",
+            "detail": ""
+          },
+          {
+            "label": "stdoutに余分なログを出さない",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "code",
+        "nodes": [
+          "scan(root, rules)",
+          "exact / regex → JSONL",
+          "stdoutに余分なログを出さない"
+        ],
+        "footer": "code_search：checkpoint 1",
+        "intent": "最初は文字列検索でも、契約は細かい",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "code_search：checkpoint 1",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        },
+        {
+          "url": "https://github.com/gabeorlanski/scb-problems/blob/ef6a9dd13911566b6b01075ca121758c9f7b5c5f/code_search/checkpoint_1.md",
+          "note": "問題仕様の進化を確認。独自例を公式解答として示さない。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "コード検索の最初の段階は、何を作るの？",
+          "speech": "コード検索の最初の段階は、何を作るの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "Pythonのファイルを探し、文字列の完全一致と正規表現で検索するCLIだよ。見つかった位置などを、一件ずつJSON形式の行として出力する。",
+          "speech": "パイソンのファイルを探し、文字列の完全一致と正規表現で検索するシーエルアイだよ。見つかった位置などを、一件ずつジェイソン形式の行として出力する。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "検索結果の順序や座標も、守るべき契約なんだね。",
+          "speech": "検索結果の順序や座標も、守るべき契約なんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。ファイル名、行、列などの順で並べ、座標は1から数える。標準出力にデバッグ文を混ぜるだけでも、契約から外れることがある。",
+          "speech": "その通り。ファイル名、行、列などの順で並べ、座標は1から数える。標準出力にデバッグ文を混ぜるだけでも、契約から外れることがある。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "Python限定とは、検索対象のファイルのことだね。",
+          "speech": "パイソン限定とは、検索対象のファイルのことだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。問題の外部仕様と、今回の論文がPython実装を評価したことは分けて考える。入出力の細部と内部設計の自由は両立しているんだ。",
+          "speech": "うん。問題の外部仕様と、今回の論文がパイソン実装を評価したことは分けて考える。入出力の細部と内部設計の自由は両立しているんだ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "3 具体例：コード検索",
+      "heading": "言語追加は、設計の境界を試す",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "Pythonの検索",
+            "detail": ""
+          },
+          {
+            "label": "JavaScript・C++も検索",
+            "detail": ""
+          },
+          {
+            "label": "共通処理と言語別処理",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "evolution",
+        "nodes": [
+          "Pythonの検索",
+          "JavaScript・C++も検索",
+          "共通処理と言語別処理"
+        ],
+        "footer": "code_search：checkpoint 2",
+        "intent": "言語追加は、設計の境界を試す",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "code_search：checkpoint 2",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        },
+        {
+          "url": "https://github.com/gabeorlanski/scb-problems/blob/ef6a9dd13911566b6b01075ca121758c9f7b5c5f/code_search/checkpoint_2.md",
+          "note": "問題仕様の進化を確認。独自例を公式解答として示さない。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "言語追加は、拡張子を増やせば済むのかな。",
+          "speech": "言語追加は、拡張子を増やせば済むのかな。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "初めはそれで動く部分もある。でも言語の判定、対象の絞り込み、規則の適用範囲が絡むと、同じ場所に条件分岐が増えやすくなる。",
+          "speech": "初めはそれで動く部分もある。でも言語の判定、対象の絞り込み、規則の適用範囲が絡むと、同じ場所に条件分岐が増えやすくなる。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "最初の関数に、例外が積み重なる姿が想像できるね。",
+          "speech": "最初の関数に、例外が積み重なる姿が想像できるね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "図はその模式例だよ。もう一つの案は、共通の探索や出力と、言語固有の処理を分けること。ただし、論文は特定のクラス設計を正解として指定していない。",
+          "speech": "図はその模式例だよ。もう一つの案は、共通の探索や出力と、言語固有の処理を分けること。ただし、論文は特定のクラス設計を正解として指定していない。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "先の要件を全部知っているわけではないんだね。",
+          "speech": "先の要件を全部知っているわけではないんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "だから初期の判断が後で効いてくる。最初から巨大な抽象化を作れば必ず勝つ、という話でもない。変更の種類に合う境界を保てるかが問われるんだ。",
+          "speech": "だから初期の判断が後で効いてくる。最初から巨大な抽象化を作れば必ず勝つ、という話でもない。変更の種類に合う境界を保てるかが問われるんだ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "3 具体例：コード検索",
+      "heading": "文字ではなく構造を一致させる",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "print(total + 1)",
+            "detail": ""
+          },
+          {
+            "label": "呼び出し → 引数の式",
+            "detail": ""
+          },
+          {
+            "label": "$VALUE = total + 1",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "ast",
+        "nodes": [
+          "print(total + 1)",
+          "呼び出し → 引数の式",
+          "$VALUE = total + 1"
+        ],
+        "footer": "checkpoint 3を説明する独自例",
+        "intent": "文字ではなく構造を一致させる",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "checkpoint 3を説明する独自例",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        },
+        {
+          "url": "https://github.com/gabeorlanski/scb-problems/blob/ef6a9dd13911566b6b01075ca121758c9f7b5c5f/code_search/checkpoint_3.md",
+          "note": "問題仕様の進化を確認。独自例を公式解答として示さない。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "構造を理解した検索は、正規表現とどこが違うの？",
+          "speech": "構造を理解した検索は、正規表現とどこが違うの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "たとえば引数に式を渡す関数呼び出しを考えよう。空白や括弧の違いを越えて、呼び出しと引数という構造を扱う必要が出てくる。",
+          "speech": "たとえば引数に式を渡す関数呼び出しを考えよう。空白や括弧の違いを越えて、呼び出しと引数という構造を扱う必要が出てくる。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "ドル記号の変数は、取り出す部分を表すんだね。",
+          "speech": "ドル記号の変数は、取り出す部分を表すんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。第三段階ではメタ変数を導入する。同じ名前が複数回現れる場合は同じテキストに一致するなど、単純な文字置換だけでは済まない条件もある。",
+          "speech": "そう。第三段階ではメタ変数を導入する。同じ名前が複数回現れる場合は同じテキストに一致するなど、単純な文字置換だけでは済まない条件もある。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "取り出した値も、契約に合わせて返す必要があるんだ。",
+          "speech": "取り出したあたいも、契約に合わせて返す必要があるんだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "公開テストでも、外部コマンドの出力から一致範囲と取り出した値を調べている。関数の内部を呼んで、決まった設計へ誘導するテストではないよ。",
+          "speech": "公開テストでも、外部コマンドの出力から一致範囲と取り出したあたいを調べている。関数の内部を呼んで、決まった設計へ誘導するテストではないよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "4 変更が積み重なるとき",
+      "heading": "検索から書き換えへ進む",
+      "pause": 0.8,
+      "board": {
+        "layout": "flow",
+        "nodes": [
+          {
+            "label": "一致箇所を見つける",
+            "detail": ""
+          },
+          {
+            "label": "変更候補を選ぶ",
+            "detail": ""
+          },
+          {
+            "label": "衝突を処理して書き換える",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "steps",
+        "nodes": [
+          "一致箇所を見つける",
+          "変更候補を選ぶ",
+          "衝突を処理して書き換える"
+        ],
+        "footer": "checkpoint 4・5／模式図",
+        "intent": "検索から書き換えへ進む",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "checkpoint 4・5／模式図",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        },
+        {
+          "url": "https://github.com/gabeorlanski/scb-problems/blob/ef6a9dd13911566b6b01075ca121758c9f7b5c5f/code_search/checkpoint_4.md",
+          "note": "仕様の追加：selectorと書き換え"
+        },
+        {
+          "url": "https://github.com/gabeorlanski/scb-problems/blob/ef6a9dd13911566b6b01075ca121758c9f7b5c5f/code_search/checkpoint_5.md",
+          "note": "さらに対象を拡張"
+        }
+      ],
+      "narration": [
+        {
+          "text": "検索の次は置換。同じループへ足したくなるね。",
+          "speech": "検索の次は置換。同じループへ足したくなるね。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "第四段階ではセレクターや自動修正、第五段階ではさらに言語対応が増える。検索と書き換えでは、変更が重なった場合など新しい問題が出てくる。",
+          "speech": "第四段階ではセレクターや自動修正、第五段階ではさらに言語対応が増える。検索と書き換えでは、変更が重なった場合など新しい問題が出てくる。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "前の検索も壊せないから、新機能だけを見ていては足りないね。",
+          "speech": "前の検索も壊せないから、新機能だけを見ていては足りないね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。以前の契約を守りながら新しい契約を満たす。前回のコードを模範解答へ置き換えず、そのまま次の土台にするから、設計の負債が残る。",
+          "speech": "その通り。以前の契約を守りながら新しい契約を満たす。前回のコードを模範解答へ置き換えず、そのまま次の土台にするから、設計の負債が残る。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "図は、特定モデルのコードの再現ではないんだね。",
+          "speech": "図は、特定モデルのコードの再現ではないんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。実験でどの設計が優位だったかと、こちらが説明用に描いた構造は別だ。仕様の進化を読むだけでも、単発の生成とは違う難しさが見えてくるよ。",
+          "speech": "うん。実験でどの設計が優位だったかと、こちらが説明用に描いた構造は別だ。仕様の進化を読むだけでも、単発の生成とは違う難しさが見えてくるよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "4 変更が積み重なるとき",
+      "heading": "同じ機能追加、違うコードの育ち方",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "分岐を1関数へ集める",
+            "detail": ""
+          },
+          {
+            "label": "重複した処理が増える",
+            "detail": ""
+          },
+          {
+            "label": "責務ごとの処理へ分ける",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "evolution",
+        "nodes": [
+          "分岐を1関数へ集める",
+          "重複した処理が増える",
+          "責務ごとの処理へ分ける"
+        ],
+        "footer": "独自の模式例：改善効果の実測ではない",
+        "intent": "同じ機能追加、違うコードの育ち方",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "独自の模式例：改善効果の実測ではない",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "機能が増えれば長くなる。それを全部劣化と呼ぶの？",
+          "speech": "機能が増えれば長くなる。それを全部劣化と呼ぶの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "大きくなること自体を、すべて悪いとは扱わないよ。注目するのは、複雑な判断が特定の関数に集中したり、同じ処理が複製されたりする増え方なんだ。",
+          "speech": "大きくなること自体を、すべて悪いとは扱わないよ。注目するのは、複雑な判断が特定の関数に集中したり、同じ処理が複製されたりする増え方なんだ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "見た目が整っているだけでは、設計を判断できないね。",
+          "speech": "見た目が整っているだけでは、設計を判断できないね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。小さく分けても結合が複雑なら保守しづらい。この研究は保守性の全部を測らず、計算できる二つの代理指標へ対象を絞っている。",
+          "speech": "そう。小さく分けても結合が複雑なら保守しづらい。この研究は保守性の全部を測らず、計算できる二つの代理指標へ対象を絞っている。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "短いコードが、必ず優れた設計でもないんだ。",
+          "speech": "短いコードが、必ず優れた設計でもないんだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そこを理解してから数式を見ると、指標が何を見ていて、何を見落とすのかが分かる。次は正しさの採点と、品質の採点を別々に追おう。",
+          "speech": "そこを理解してから数式を見ると、指標が何を見ていて、何を見落とすのかが分かる。次は正しさの採点と、品質の採点を別々に追おう。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "4 変更が積み重なるとき",
+      "heading": "過去の正解を、次でも守れるか",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "Core",
+            "detail": ""
+          },
+          {
+            "label": "Error・Functionality",
+            "detail": ""
+          },
+          {
+            "label": "Regression",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "checks",
+        "nodes": [
+          "Core",
+          "Error・Functionality",
+          "Regression"
+        ],
+        "footer": "古い契約も新しいコードで再検査",
+        "intent": "過去の正解を、次でも守れるか",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "古い契約も新しいコードで再検査",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "新機能が動いても、前の機能が壊れたら？",
+          "speech": "新機能が動いても、前の機能が壊れたら？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "過去のチェックポイントのテストも回帰テストとして使う。新機能のテストだけ通っても、以前の契約を壊していれば、厳密な合格にはならないよ。",
+          "speech": "過去のチェックポイントのテストも回帰テストとして使う。新機能のテストだけ通っても、以前の契約を壊していれば、厳密な合格にはならないよ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "一つのバグが、後の段階にも残るんだね。",
+          "speech": "一つのバグが、後の段階にも残るんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そうだよ。それが実際の自己拡張の難しさでもある。一方で、どこで失敗しているか見分けるため、過去のテストを除く指標も併記する。",
+          "speech": "そうだよ。それが実際の自己拡張の難しさでもある。一方で、どこで失敗しているか見分けるため、過去のテストを除く指標も併記する。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "過去の不具合を除いた値は、総合的な正解とは違うね。",
+          "speech": "過去の不具合を除いたあたいは、総合的な正解とは違うね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。この区別を外すと、順位表の大きな数字だけ見て、問題全体を何割解けたのかと誤解しやすい。次の三つの名前を整理しよう。",
+          "speech": "その通り。この区別を外すと、順位表の大きな数字だけ見て、問題全体を何割解けたのかと誤解しやすい。次の三つの名前を整理しよう。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "5 正しさの指標",
+      "heading": "Strict・ISO・COREを並べる",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "Strict：全部",
+            "detail": ""
+          },
+          {
+            "label": "ISO：今回のテスト",
+            "detail": ""
+          },
+          {
+            "label": "CORE：基本動作",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "checks",
+        "nodes": [
+          "Strict：全部",
+          "ISO：今回のテスト",
+          "CORE：基本動作"
+        ],
+        "footer": "集合が違うので、合格率も違う",
+        "intent": "Strict・ISO・COREを並べる",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "集合が違うので、合格率も違う",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "Strict、ISO、COREは、何を分けているの？",
+          "speech": "ストリクト、アイエスオー、コアは、何を分けているの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "見るテストの集合が違う。Strictは回帰テストも含む全部。ISOは今回の段階の非回帰テスト。COREは仕様の基本動作に対応するテストだ。",
+          "speech": "見るテストの集合が違う。ストリクトは回帰テストも含む全部。アイエスオーは今回の段階の非回帰テスト。コアは仕様の基本動作に対応するテストだ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "基本動作だけでは、ISOに届かないわけだね。",
+          "speech": "基本動作だけでは、アイエスオーに届かないわけだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。たとえば基本と新機能は通り、昔の契約だけ壊れたなら、ISOは合格でもStrictは不合格。この図の色はその独自例を示しているよ。",
+          "speech": "そう。たとえば基本と新機能は通り、昔の契約だけ壊れたなら、アイエスオーは合格でもストリクトは不合格。この図の色はその独自例を示しているよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "COREとStrictの差にも、意味があるんだ。",
+          "speech": "コアとストリクトの差にも、意味があるんだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "ただし三つの値だけで失敗原因が全部分かるわけではない。実際の不合格ケースも見る必要がある。まず同じ分母とテスト集合で比較するのが出発点だ。",
+          "speech": "ただし三つのあたいだけで失敗原因が全部分かるわけではない。実際の不合格ケースも見る必要がある。まず同じ分母とテスト集合で比較するのが出発点だ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "5 正しさの指標",
+      "heading": "テスト合格率と段階の完了率",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "10件中9件のテスト",
+            "detail": ""
+          },
+          {
+            "label": "その段階は未完了",
+            "detail": ""
+          },
+          {
+            "label": "全段階完走はさらに別",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "matrix",
+        "nodes": [
+          "10件中9件のテスト",
+          "その段階は未完了",
+          "全段階完走はさらに別"
+        ],
+        "footer": "90%のテスト通過 ≠ 90%の問題完了",
+        "intent": "テスト合格率と段階の完了率",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "90%のテスト通過 ≠ 90%の問題完了",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "10個中9個のテストに通れば、90パーセント解けたと数えるの？",
+          "speech": "10個中9個のテストに通れば、90パーセント解けたと数えるの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "テスト単位の通過率ならそう言える。でも段階を完全に解いた割合では、対象のテストを全部通る必要がある。9個だけなら、その段階の合格はゼロだ。",
+          "speech": "テスト単位の通過率ならそう言える。でも段階を完全に解いた割合では、対象のテストを全部通る必要がある。9個だけなら、その段階の合格はゼロだ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "問題の完走には、すべての段階で合格が必要なんだね。",
+          "speech": "問題の完走には、すべての段階で合格が必要なんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。どれか一つの段階を解いた問題の割合も別にある。論文の表には複数の粒度が並ぶので、見出しと定義を確認しないと読み違えてしまう。",
+          "speech": "うん。どれか一つの段階を解いた問題の割合も別にある。論文の表には複数の粒度が並ぶので、見出しと定義を確認しないと読み違えてしまう。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "完走ゼロは、何も動かなかったという意味ではないんだ。",
+          "speech": "完走ゼロは、何も動かなかったという意味ではないんだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その理解が大切だ。基本動作の多くを実装しても、仕様全体を毎回守ることは難しい。ゼロという値と、途中までできた能力を同時に見る必要があるよ。",
+          "speech": "その理解が大切だ。基本動作の多くを実装しても、仕様全体を毎回守ることは難しい。ゼロというあたいと、途中までできた能力を同時に見る必要があるよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "5 正しさの指標",
+      "heading": "未完了の軌跡をどう数えるか",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "成績：欠けた段階も分母へ",
+            "detail": ""
+          },
+          {
+            "label": "品質：成果物がある段階",
+            "detail": ""
+          },
+          {
+            "label": "比較する集団が違う",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "matrix",
+        "nodes": [
+          "成績：欠けた段階も分母へ",
+          "品質：成果物がある段階",
+          "比較する集団が違う"
+        ],
+        "footer": "v2 §2.4・Table 1",
+        "intent": "未完了の軌跡をどう数えるか",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "v2 §2.4・Table 1",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "途中で止まったら、残りは平均から消えるの？",
+          "speech": "途中で止まったら、残りは平均から消えるの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "正しさの指標では未実行の段階も未解決として数える。v2の表は196チェックポイントという固定の分母を使う。一方、品質は成果物がある段階だけで計算する。",
+          "speech": "正しさの指標では未実行の段階も未解決として数える。バージョンにの表は196チェックポイントという固定の分母を使う。一方、品質は成果物がある段階だけで計算する。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "正しさと品質では、数える対象が違うんだね。",
+          "speech": "正しさと品質では、数える対象が違うんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。長く進んだ軌跡には難しい後半のコードが残る。途中で欠けたものの扱いを確認しないと、単純な平均の差を過剰に解釈してしまう。",
+          "speech": "その通り。長く進んだ軌跡には難しい後半のコードが残る。途中で欠けたものの扱いを確認しないと、単純な平均の差を過剰に解釈してしまう。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "段階数が違う問題は、進行度もそろえるんだね。",
+          "speech": "段階数が違う問題は、進行度もそろえるんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "論文では開始、前半、中盤、後半、最終という段階へそろえて集計する。これは進行度の区分で、経過時間やトークン数を同じにした比較ではないよ。",
+          "speech": "論文では開始、前半、中盤、後半、最終という段階へそろえて集計する。これは進行度の区分で、経過時間やトークン数を同じにした比較ではないよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "6 品質指標：構造的侵食",
+      "heading": "分岐の複雑さに、関数の大きさを加える",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "CC：制御の複雑さ",
+            "detail": ""
+          },
+          {
+            "label": "SLOC：ソース行数",
+            "detail": ""
+          },
+          {
+            "label": "mass = CC × √SLOC",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "mass",
+        "nodes": [
+          "CC：制御の複雑さ",
+          "SLOC：ソース行数",
+          "mass = CC × √SLOC"
+        ],
+        "footer": "論文v2 式2／数値は独自例",
+        "intent": "分岐の複雑さに、関数の大きさを加える",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "論文v2 式2／数値は独自例",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "構造的侵食は、何を数える指標なの？",
+          "speech": "構造的侵食は、何を数える指標なの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "関数ごとの循環的複雑度、つまり制御の経路に関する指標と、ソース行数を使う。複雑度に行数の平方根を掛けて、重みを作るんだ。",
+          "speech": "関数ごとの循環的複雑度、つまり制御の経路に関する指標と、ソースぎょうすうを使う。複雑度にぎょうすうの平方根を掛けて、重みを作るんだ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          },
+          "expectedKana": "カンスウゴトノジュンカンテキフクザツドツマリセエギョノケエロニカンスルシヒョオトソオスギョウスウオツカウフクザツドニギョウスウノヘエホオコンオカケテオモミオツクルンダ"
+        },
+        {
+          "text": "サイズを考慮するけれど、行数をそのまま掛けないんだね。",
+          "speech": "サイズを考慮するけれど、ぎょうすうをそのまま掛けないんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そうだよ。平方根でサイズの影響を圧縮する。黒板の独自例なら、複雑度が12、行数が100の関数の重みは、12掛ける10で120になる。",
+          "speech": "そうだよ。平方根でサイズの影響を圧縮する。黒板の独自例なら、複雑度が12、ぎょうすうが100の関数の重みは、12掛ける10で120になる。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "長い一覧と、分岐だらけの処理は同じに数えないんだ。",
+          "speech": "長い一覧と、分岐だらけの処理は同じに数えないんだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "狙いは複雑な判断が集まった関数を捉えることだよ。ただし、この式だけで理解しやすさや設計の妥当性が直接分かるわけではない。次に全体との比率を取る。",
+          "speech": "狙いは複雑な判断が集まった関数を捉えることだよ。ただし、この式だけで理解しやすさや設計の妥当性が直接分かるわけではない。次に全体との比率を取る。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "6 品質指標：構造的侵食",
+      "heading": "高複雑度の関数へ何割集まるか",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "A：CC12・100行 → 120",
+            "detail": ""
+          },
+          {
+            "label": "B：CC4・25行 → 20",
+            "detail": ""
+          },
+          {
+            "label": "C：CC2・25行 → 10",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "mass",
+        "nodes": [
+          "A：CC12・100行 → 120",
+          "B：CC4・25行 → 20",
+          "C：CC2・25行 → 10"
+        ],
+        "footer": "独自例：120 ÷ 150 = 0.80",
+        "intent": "高複雑度の関数へ何割集まるか",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "独自例：120 ÷ 150 = 0.80",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "重み120だけでは、全体での大きさが分からないね。",
+          "speech": "重み120だけでは、全体での大きさが分からないね。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そこで全関数の重みを合計し、複雑度が10を超える関数の分を分子に置く。黒板ではAが120、Bが20、Cが10で、全体は150だ。",
+          "speech": "そこで全関数の重みを合計し、複雑度が10を超える関数の分を分子に置く。黒板ではAが120、Bが20、Cが10で、全体は150だ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "Aだけが対象なので、120割る150で0.8だね。",
+          "speech": "Aだけが対象なので、120割る150で0.8だね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。80パーセントの関数が悪い、という意味ではない。高複雑度の関数に、計算上の重みの80パーセントが集まっているという意味だよ。",
+          "speech": "その通り。80パーセントの関数が悪い、という意味ではない。高複雑度の関数に、計算上の重みの80パーセントが集まっているという意味だよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "関数の本数でも、行数の割合でもないんだね。",
+          "speech": "関数の本数でも、ぎょうすうの割合でもないんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。複雑度10ちょうどは、この式の分子には入らない。しきい値をまたぐと値が変わるので、小さな差を読む際にも式の定義を思い出そう。",
+          "speech": "うん。複雑度10ちょうどは、この式の分子には入らない。しきいちをまたぐとあたいが変わるので、小さな差を読む際にも式の定義を思い出そう。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          },
+          "expectedKana": "ウンフクザツドジュウチョオドワコノシキノブンシニワハイラナイシキイチオマタグトアタイガカワルノデチイサナサオヨムサイニモシキノテエギオオモイダソオ"
+        }
+      ]
+    },
+    {
+      "chapter": "6 品質指標：構造的侵食",
+      "heading": "指標を下げても、設計が良くなるとは限らない",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "関数を機械的に分割",
+            "detail": ""
+          },
+          {
+            "label": "呼び出し関係は複雑",
+            "detail": ""
+          },
+          {
+            "label": "人が責務と挙動を確認",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "compare",
+        "nodes": [
+          "関数を機械的に分割",
+          "呼び出し関係は複雑",
+          "人が責務と挙動を確認"
+        ],
+        "footer": "指標はレビューの入口",
+        "intent": "指標を下げても、設計が良くなるとは限らない",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "指標はレビューの入口",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "関数を機械的に分割すれば、数値を下げられるのでは？",
+          "speech": "関数を機械的に分割すれば、数値を下げられるのでは？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "式の上では下がる場合がある。だから指標だけを最適化すると、意味のない分割や、複雑な依存関係を増やす可能性があるんだ。",
+          "speech": "式の上では下がる場合がある。だから指標だけを最適化すると、意味のない分割や、複雑な依存関係を増やす可能性があるんだ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "数値の改善は、そのまま保守性の改善とは言えないね。",
+          "speech": "数値の改善は、そのまま保守性の改善とは言えないね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。循環的複雑度は制御の一面を見るけれど、名前の分かりやすさ、モジュールの責任、セキュリティ、業務知識の整理を全部測るものではない。",
+          "speech": "そう。循環的複雑度は制御の一面を見るけれど、名前の分かりやすさ、モジュールの責任、セキュリティ、業務知識の整理を全部測るものではない。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "増えた関数を読む入口として、使う方がよさそうだ。",
+          "speech": "増えた関数を読む入口として、使う方がよさそうだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その使い方は実務への提案だよ。論文が、その運用の効果まで実験で証明したわけではない。検査値と、人がコードを読む判断を組み合わせることになる。",
+          "speech": "その使い方は実務への提案だよ。論文が、その運用の効果まで実験で証明したわけではない。検査値と、人がコードを読む判断を組み合わせることになる。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "7 品質指標：冗長性",
+      "heading": "ルールで見つける行と、複製された行",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "AST-grepの検出行",
+            "detail": ""
+          },
+          {
+            "label": "構造的な重複行",
+            "detail": ""
+          },
+          {
+            "label": "和集合 ÷ LOC",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "union",
+        "nodes": [
+          "AST-grepの検出行",
+          "構造的な重複行",
+          "和集合 ÷ LOC"
+        ],
+        "footer": "論文v2 式4／137個のルール",
+        "intent": "ルールで見つける行と、複製された行",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "論文v2 式4／137個のルール",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "冗長性は、長いコードほど高くなるのかな。",
+          "speech": "冗長性は、長いコードほど高くなるのかな。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "長さそのものではなく、冗長なパターンに該当する行や、構造的な重複として見つかった行の割合を測る。論文では137個のAST-grepルールを用意した。",
+          "speech": "長さそのものではなく、冗長なパターンに該当するぎょうや、構造的な重複として見つかったぎょうの割合を測る。論文では137個のエーエスティーグレップルールを用意した。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "中間変数やコピーなどのパターンを拾うんだね。",
+          "speech": "中間変数やコピーなどのパターンを拾うんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "ただし個々の検出には文脈がある。防御的な検査が必要な場面もあるので、旗が立った行すべてを無条件に削る指示としては使えないよ。",
+          "speech": "ただし個々の検出には文脈がある。防御的な検査が必要な場面もあるので、旗が立った行すべてを無条件に削る指示としては使えないよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "同じ行に何度も旗が立ったら、重ねて数えるの？",
+          "speech": "同じ行に何度も旗が立ったら、重ねて数えるの？",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "重複して数えない。ルールで見つかった行とクローンの行を和集合にして、全体の行数で割る。そのため、この比率はゼロから一の範囲になるんだ。",
+          "speech": "重複して数えない。ルールで見つかったぎょうとクローンのぎょうを和集合にして、全体のぎょうすうでわる。そのため、この比率はゼロから一の範囲になるんだ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "7 品質指標：冗長性",
+      "heading": "重なる行を二重に数えない",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "全体100行",
+            "detail": ""
+          },
+          {
+            "label": "ルール20・重複30",
+            "detail": ""
+          },
+          {
+            "label": "共通10 → 合計40",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "union",
+        "nodes": [
+          "全体100行",
+          "ルール20・重複30",
+          "共通10 → 合計40"
+        ],
+        "footer": "独自例：(20 + 30 − 10) / 100 = 0.40",
+        "intent": "重なる行を二重に数えない",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "独自例：(20 + 30 − 10) / 100 = 0.40",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "100行中、ルール20行、コピー30行ならどうなる？",
+          "speech": "100行中、ルール20行、コピー30行ならどうなる？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "両方に該当する行が10行あるとしよう。その10行は二重に数えないので、20足す30引く10で、対象は40行になる。",
+          "speech": "両方に該当する行が10行あるとしよう。その10行は二重に数えないので、20足す30引く10で、対象は40行になる。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "重なりを引くので、0.5ではなく0.4なんだね。",
+          "speech": "重なりを引くので、0.5ではなく0.4なんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。黒板では重なる部分に両方の印を付けてから、一度だけ数える。これは論文の実測値ではなく、式の意味を確かめるための独自例だよ。",
+          "speech": "そう。黒板では重なる部分に両方の印を付けてから、一度だけ数える。これは論文の実測値ではなく、式の意味を確かめるための独自例だよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "検出の内訳で、直す方針も変わりそうだ。",
+          "speech": "検出の内訳で、直す方針も変わりそうだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そこも大切だよ。合成されたスコアだけでなく、何が検出されたかを分けて見る。論文でも、反復で特に重複が増えるという内訳を調べているんだ。",
+          "speech": "そこも大切だよ。合成されたスコアだけでなく、何が検出されたかを分けて見る。論文でも、反復で特に重複が増えるという内訳を調べているんだ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "7 品質指標：冗長性",
+      "heading": "2つの軸は、同じものではない",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "複雑さの集中",
+            "detail": ""
+          },
+          {
+            "label": "冗長・重複の割合",
+            "detail": ""
+          },
+          {
+            "label": "正しさはさらに別軸",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "quadrants",
+        "nodes": [
+          "複雑さの集中",
+          "冗長・重複の割合",
+          "正しさはさらに別軸"
+        ],
+        "footer": "片方が低くても、もう片方は高くなりうる",
+        "intent": "2つの軸は、同じものではない",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "片方が低くても、もう片方は高くなりうる",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S2",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "侵食が高ければ、冗長性も必ず高いの？",
+          "speech": "侵食が高ければ、冗長性も必ず高いの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そうとは限らない。重複は少なくても、巨大な関数に判断が集中することがある。逆に、小さな関数を大量にコピーして冗長性が上がる場合もあるよ。",
+          "speech": "そうとは限らない。重複は少なくても、巨大な関数に判断が集中することがある。逆に、小さな関数を大量にコピーして冗長性が上がる場合もあるよ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "二つの軸で、問題の種類を分けて見られるんだね。",
+          "speech": "二つの軸で、問題の種類を分けて見られるんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。ただし配置した点は説明用で、実際のモデルの測定点ではない。そして両方の値が低くても、仕様を満たさないプログラムは正解にはならない。",
+          "speech": "うん。ただし配置した点は説明用で、実際のモデルの測定点ではない。そして両方のあたいが低くても、仕様を満たさないプログラムは正解にはならない。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "品質と正しさを、一つの順位に押し込めない方がよいんだ。",
+          "speech": "品質と正しさを、一つの順位に押し込めない方がよいんだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "研究の重要な発想は、正しさの外にも観測窓を作ることなんだ。窓は増えたけれど、ソフトウェア品質の全景が見えるようになったわけではない、と捉えよう。",
+          "speech": "研究の重要な発想は、正しさの外にも観測窓を作ることなんだ。窓は増えたけれど、ソフトウェア品質の全景が見えるようになったわけではない、と捉えよう。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "8 論文の結果を読む",
+      "heading": "v2の最高値は何を意味するか",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "Strict",
+            "detail": ""
+          },
+          {
+            "label": "ISO",
+            "detail": ""
+          },
+          {
+            "label": "CORE",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "bars",
+        "nodes": [
+          "Strict",
+          "ISO",
+          "CORE"
+        ],
+        "footer": "論文v2 Table 1：GPT 5.5／報告値",
+        "intent": "v2の最高値は何を意味するか",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "論文v2 Table 1：GPT 5.5／報告値",
+        "invariant": "比較対象の名前と色を維持する",
+        "values": [
+          14.8,
+          28.1,
+          66.8
+        ],
+        "max": 100,
+        "unit": "%"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S3",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "v2では最高でも14.8パーセントという結果だね。",
+          "speech": "バージョンにでは最高でも14.8パーセントという結果だね。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "それは196チェックポイントに対する厳密な合格率で、GPT 5.5の値だよ。同じ表のISOは28.1パーセント、COREは66.8パーセントになっている。",
+          "speech": "それは196チェックポイントに対する厳密な合格率で、ジーピーティー、ご、てん、ごのあたいだよ。おなじ、ひょうのアイエスオーは28.1パーセント、コアは66.8パーセントになっている。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          },
+          "expectedKana": "ソレワヒャクキュウジュウロクチェックポイントニタイスルゲンミツナゴオカクリツデジイピイティイゴテンゴノアタイダヨオナジヒョウノアイエスオオワニジュウハッテンイチパアセントコアワロクジュウロクテンハチパアセントニナッテイル"
+        },
+        {
+          "text": "基本動作と全部の契約では、大きな差があるね。",
+          "speech": "基本動作と全部の契約では、大きな差があるね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。この三つを並べると、ほとんど何も作れなかったという理解も、三分の二の問題を完走したという理解も、どちらも違うと分かる。",
+          "speech": "そう。この三つを並べると、ほとんど何も作れなかったという理解も、三分の二の問題を完走したという理解も、どちらも違うと分かる。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "問題を最初から最後まで解く割合は、さらに別だね。",
+          "speech": "問題を最初から最後まで解く割合は、さらに別だね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。これらは論文の条件で得られた報告値であって、今日の全モデルの能力を普遍的に表す数字ではない。モデルと実行環境をセットで読む必要があるよ。",
+          "speech": "その通り。これらは論文の条件で得られた報告値であって、今日の全モデルの能力を普遍的に表す数字ではない。モデルと実行環境をセットで読む必要があるよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "8 論文の結果を読む",
+      "heading": "追加作業の費用は増えていた",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "開始の費用",
+            "detail": ""
+          },
+          {
+            "label": "最終の費用",
+            "detail": ""
+          },
+          {
+            "label": "2.2倍",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "bars",
+        "nodes": [
+          "開始 = 1",
+          "最終 = 2.2"
+        ],
+        "footer": "論文v2 §3.1：平均費用の比",
+        "intent": "追加作業の費用は増えていた",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "論文v2 §3.1：平均費用の比",
+        "invariant": "比較対象の名前と色を維持する",
+        "values": [
+          1,
+          2.2
+        ],
+        "max": 2.5,
+        "unit": "倍"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S3",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "後半が難しいなら、多く費用を使えば追いつけるのかな。",
+          "speech": "後半が難しいなら、多く費用を使えば追いつけるのかな。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "論文では、開始から最終にかけてチェックポイント当たりの平均費用が2.2倍になった。それでも正しさが対応して改善したわけではないと報告している。",
+          "speech": "論文では、開始から最終にかけてチェックポイント当たりの平均費用が2.2倍になった。それでも正しさが対応して改善したわけではないと報告している。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "一と二点二はドルではなく、開始を一とした比だね。",
+          "speech": "一と二点二はドルではなく、開始を一とした比だね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。モデルごとの単価も実行時間も違うので、費用をトークン数や思考の質そのものと同一視しないこと。表には複数の観測値が分けて載っているよ。",
+          "speech": "そう。モデルごとの単価も実行時間も違うので、費用をトークン数や思考の質そのものと同一視しないこと。表には複数の観測値が分けて載っているよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "読むコードの増加も考えられるが、原因は断定できないね。",
+          "speech": "読むコードの増加も考えられるが、原因は断定できないね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。観測は、後半で費用が増し、成績が伸びにくいということ。どの仕組みが何割の費用増を生んだかまでは、この比だけからは分からないんだ。",
+          "speech": "うん。観測は、後半で費用が増し、成績が伸びにくいということ。どの仕組みが何割の費用増を生んだかまでは、この比だけからは分からないんだ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "8 論文の結果を読む",
+      "heading": "劣化した軌跡の割合",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "侵食が増加",
+            "detail": ""
+          },
+          {
+            "label": "冗長性が増加",
+            "detail": ""
+          },
+          {
+            "label": "77% / 75.5%",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "bars",
+        "nodes": [
+          "侵食が増えた軌跡",
+          "冗長性が増えた軌跡"
+        ],
+        "footer": "論文v2 §3.2：軌跡の割合",
+        "intent": "劣化した軌跡の割合",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "論文v2 §3.2：軌跡の割合",
+        "invariant": "比較対象の名前と色を維持する",
+        "values": [
+          77,
+          75.5
+        ],
+        "max": 100,
+        "unit": "%"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S3",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "77パーセントとは、コードの77パーセントが悪くなったの？",
+          "speech": "77パーセントとは、コードの77パーセントが悪くなったの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "違うよ。構造的侵食の値が増えた軌跡の割合だ。冗長性が増えた軌跡は75.5パーセント。コード行の割合でも、性能の低下率でもない。",
+          "speech": "違うよ。構造的侵食のあたいが増えた軌跡の割合だ。冗長性が増えた軌跡は75.5パーセント。コードぎょうの割合でも、性能の低下率でもない。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "多くの軌跡で、同じ方向の変化があったんだね。",
+          "speech": "多くの軌跡で、同じ方向の変化があったんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。さらに平均で、高い複雑度の関数の数や、最大の複雑度も増えたと報告している。ただし集計値から、すべての関数が同じように劣化したとは言えない。",
+          "speech": "そう。さらに平均で、高い複雑度の関数の数や、最大の複雑度も増えたと報告している。ただし集計値から、すべての関数が同じように劣化したとは言えない。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "v1の数値と並べるなら、版を添える必要があるね。",
+          "speech": "バージョンいちの数値と並べるなら、版を添える必要があるね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。対象問題や実験が拡張されているので、単純な改善率として引き算しない。共通する傾向と、別の評価集合で得た数値を分けて読むことが大切だ。",
+          "speech": "うん。対象問題や実験が拡張されているので、単純な改善率として引き算しない。共通する傾向と、別の評価集合で得た数値を分けて読むことが大切だ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "9 比較と介入の限界",
+      "heading": "人間のリポジトリは対照実験か",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "473個のPythonリポジトリ",
+            "detail": ""
+          },
+          {
+            "label": "エージェントの課題成果物",
+            "detail": ""
+          },
+          {
+            "label": "同一課題の比較ではない",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "compare",
+        "nodes": [
+          "473個のPythonリポジトリ",
+          "エージェントの課題成果物",
+          "同一課題の比較ではない"
+        ],
+        "footer": "論文v2 §3.3：指標の基準合わせ",
+        "intent": "人間のリポジトリは対照実験か",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "論文v2 §3.3：指標の基準合わせ",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S3",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "人間より2倍悪いとは、直接対決をした結果なの？",
+          "speech": "人間より2倍悪いとは、直接対決をした結果なの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "比較したのは473個の公開Pythonリポジトリで、同じ課題を人間が解いた答案ではない。規模、目的、年齢、開発過程が違う、基準合わせのための比較だ。",
+          "speech": "比較したのは473個の公開パイソンリポジトリで、同じ課題を人間が解いた答案ではない。規模、目的、年齢、開発過程が違う、基準合わせのための比較だ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "条件が違っても、比較する意味はあるの？",
+          "speech": "条件が違っても、比較する意味はあるの？",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "指標が実際の保守されたソフトでどの程度になるか、参考の分布を作れる。論文では冗長性が約2.3倍、侵食が約2倍という平均の差を報告しているよ。",
+          "speech": "指標が実際の保守されたソフトでどの程度になるか、参考の分布を作れる。論文では冗長性が約2.3倍、侵食が約2倍という平均の差を報告しているよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "差の原因を、AIだけに帰することはできないんだね。",
+          "speech": "差の原因を、エーアイだけに帰することはできないんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。人間側にも多様な事情があり、近年のコードにはAI支援が含まれる可能性もある。比較対象をそろえた因果実験ではないという制約を残して読むべきだよ。",
+          "speech": "そう。人間側にも多様な事情があり、近年のコードにはエーアイ支援が含まれる可能性もある。比較対象をそろえた因果実験ではないという制約を残して読むべきだよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "9 比較と介入の限界",
+      "heading": "履歴の1ステップは同じ大きさではない",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "人間：変更を含むコミット",
+            "detail": ""
+          },
+          {
+            "label": "エージェント：仕様の段階",
+            "detail": ""
+          },
+          {
+            "label": "速度の差は条件付き",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "compare",
+        "nodes": [
+          "人間：変更を含むコミット",
+          "エージェント：仕様の段階",
+          "速度の差は条件付き"
+        ],
+        "footer": "最大30コミット／計13,667時点",
+        "intent": "履歴の1ステップは同じ大きさではない",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "最大30コミット／計13,667時点",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S3",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "人間の履歴も追えば、劣化の速さを比べられる？",
+          "speech": "人間の履歴も追えば、劣化の速さを比べられる？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "v2ではリポジトリごとに最大30個の変更を含むコミットを抽出し、合計13,667時点を使っている。エージェントの軌跡と、指標の変化を比較しているよ。",
+          "speech": "バージョンにではリポジトリごとに最大30個の変更を含むコミットを抽出し、合計いちまんさんぜんろっぴゃくろくじゅうなな時点を使っている。エージェントの軌跡と、指標の変化を比較しているよ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "小さな修正コミットと、大きな機能追加では作業量が違うよね。",
+          "speech": "小さな修正コミットと、大きな機能追加では作業量が違うよね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "まさにその注意が必要だ。論文はエージェント側の増え方が大きいと報告するが、1ステップ当たりの比を、同じ作業量での劣化速度と読み替えない。",
+          "speech": "まさにその注意が必要だ。論文はエージェント側の増え方が大きいと報告するが、1ステップ当たりの比を、同じ作業量での劣化速度と読み替えない。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "変化の原因には、追加の調査が必要なんだね。",
+          "speech": "変化の原因には、追加の調査が必要なんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。レビュー、テスト、設計の歴史、課題の性質などが重なる。観測された違いを出発点にしつつ、未測定の原因を結論のように語らないことが重要だよ。",
+          "speech": "そう。レビュー、テスト、設計の歴史、課題の性質などが重なる。観測された違いを出発点にしつつ、未測定の原因を結論のように語らないことが重要だよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "9 比較と介入の限界",
+      "heading": "きれいに書け、と頼んだら？",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "just-solve",
+            "detail": ""
+          },
+          {
+            "label": "anti-slop",
+            "detail": ""
+          },
+          {
+            "label": "plan-first",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "compare",
+        "nodes": [
+          "just-solve",
+          "anti-slop",
+          "plan-first"
+        ],
+        "footer": "論文v2 §3.4／3モデルで介入",
+        "intent": "きれいに書け、と頼んだら？",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "論文v2 §3.4／3モデルで介入",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S3",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "計画して重複を避けてと頼めば、改善しそうだけれど。",
+          "speech": "計画して重複を避けてと頼めば、改善しそうだけれど。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "論文はその介入も試している。基本の指示に対し、冗長な書き方を避ける指示と、先に計画を書く指示を比較した。v2では三つのモデルを対象にしているよ。",
+          "speech": "論文はその介入も試している。基本の指示に対し、冗長な書き方を避ける指示と、先に計画を書く指示を比較した。バージョンにでは三つのモデルを対象にしているよ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "最初の品質と、その後の崩れにくさを分けて見たいね。",
+          "speech": "最初の品質と、その後の崩れにくさを分けて見たいね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。報告では品質の水準が下がる例がある一方、全体として劣化をなくすには至らなかった。正しさや費用にも、同時に変化があるんだ。",
+          "speech": "その通り。報告では品質の水準が下がる例がある一方、全体として劣化をなくすには至らなかった。正しさや費用にも、同時に変化があるんだ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "プロンプトは無効、とまとめるのは雑すぎるね。",
+          "speech": "プロンプトは無効、とまとめるのは雑すぎるね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。初期品質、途中の変化、最終品質、テスト結果、費用を並べて評価する。どの目的に効いて、何を犠牲にしたのかまで見る研究として読もう。",
+          "speech": "うん。初期品質、途中の変化、最終品質、テスト結果、費用を並べて評価する。どの目的に効いて、何を犠牲にしたのかまで見る研究として読もう。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "10 結論を強くしすぎない",
+      "heading": "開始点と傾き、例外も読む",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "初期の品質",
+            "detail": ""
+          },
+          {
+            "label": "その後の変化",
+            "detail": ""
+          },
+          {
+            "label": "全条件で同じではない",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "trajectory",
+        "nodes": [
+          "初期の品質",
+          "その後の変化",
+          "全条件で同じではない"
+        ],
+        "footer": "模式図／GPT 5.4 anti-slopには改善例の記述",
+        "intent": "開始点と傾き、例外も読む",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "模式図／GPT 5.4 anti-slopには改善例の記述",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S3",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "開始点が低くても、同じように悪化するということ？",
+          "speech": "開始点が低くても、同じように悪化するということ？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "黒板はその考え方を示す模式図だよ。ただし全モデルで全く同じ傾きだった、と言い切ってはいけない。v2本文には特定条件で改善した例も記されている。",
+          "speech": "黒板はその考え方を示す模式図だよ。ただし全モデルで全く同じ傾きだった、と言い切ってはいけない。バージョンに本文には特定条件で改善した例も記されている。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "GPT 5.4のanti-slopには、改善したという記述があるね。",
+          "speech": "ジーピーティー、ご、てん、よんのアンチスロップには、改善したという記述があるね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。一方で研究全体の結論は、試した指示が反復による問題を一貫して解消しないというもの。個別の例外と全体の傾向を両方残すことが大切だよ。",
+          "speech": "そう。一方で研究全体の結論は、試した指示が反復による問題を一貫して解消しないというもの。個別の例外と全体の傾向を両方残すことが大切だよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "すべての指示が無力だと、証明したわけではないんだね。",
+          "speech": "すべての指示が無力だと、証明したわけではないんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。まして継続的な構造検査やレビューを組み込む運用まで、すべて検証した研究ではない。未検証の改善案を、否定済みと扱わないようにしよう。",
+          "speech": "その通り。まして継続的な構造検査やレビューを組み込む運用まで、すべて検証した研究ではない。未検証の改善案を、否定済みと扱わないようにしよう。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "10 結論を強くしすぎない",
+      "heading": "品質・正しさ・費用のトレードオフ",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "GPT5.5：基本",
+            "detail": ""
+          },
+          {
+            "label": "anti-slop",
+            "detail": ""
+          },
+          {
+            "label": "plan-first",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "bars",
+        "nodes": [
+          "GPT5.5：基本",
+          "anti-slop",
+          "plan-first"
+        ],
+        "footer": "v2 Table 3：Strict 14.8 / 9.2 / 8.2%",
+        "intent": "品質・正しさ・費用のトレードオフ",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "v2 Table 3：Strict 14.8 / 9.2 / 8.2%",
+        "invariant": "比較対象の名前と色を維持する",
+        "values": [
+          14.8,
+          9.2,
+          8.2
+        ],
+        "max": 20,
+        "unit": "%"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S3",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "品質が改善しても、合格率が下がるなら単純には喜べないね。",
+          "speech": "品質が改善しても、合格率が下がるなら単純には喜べないね。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "たとえばv2のGPT 5.5では、基本のStrictが14.8パーセント、anti-slopが9.2、plan-firstが8.2。これはその実験の報告値だよ。",
+          "speech": "たとえばバージョンにのジーピーティー、ご、てん、ごでは、基本のストリクトが14.8パーセント、アンチスロップが9.2、プランファーストが8.2。これはその実験の報告値だよ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "原因の仮説は立てられるけれど、断定はできないね。",
+          "speech": "原因の仮説は立てられるけれど、断定はできないね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。費用も含めて見る必要がある。著者らは、試した指示が平均でチェックポイント当たりの費用を12.1パーセント増やしたとも報告している。",
+          "speech": "そう。費用も含めて見る必要がある。著者らは、試した指示が平均でチェックポイント当たりの費用を12.1パーセント増やしたとも報告している。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "必要な動作を守れているかも、同時に確認するんだ。",
+          "speech": "必要な動作を守れているかも、同時に確認するんだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。指標を追う活動自体にもコストがある。何を優先するかを明確にし、同じ条件で比較することが、実務へ持ち帰れる判断の仕方だよ。",
+          "speech": "うん。指標を追う活動自体にもコストがある。何を優先するかを明確にし、同じ条件で比較することが、実務へ持ち帰れる判断の仕方だよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "10 結論を強くしすぎない",
+      "heading": "この研究が測っていないもの",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "Pythonの評価",
+            "detail": ""
+          },
+          {
+            "label": "隠された採点結果",
+            "detail": ""
+          },
+          {
+            "label": "モデル＋ハーネス",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "compare",
+        "nodes": [
+          "Pythonの評価",
+          "隠された採点結果",
+          "モデル＋ハーネス"
+        ],
+        "footer": "実務全体・全言語・全運用の証明ではない",
+        "intent": "この研究が測っていないもの",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "実務全体・全言語・全運用の証明ではない",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S4",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "普段の開発にも、そのまま当てはめてよいのかな。",
+          "speech": "普段の開発にも、そのまま当てはめてよいのかな。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "条件を確認してからだね。論文の実験はPythonの実装が対象で、採点用テストのフィードバックは渡さない。継続的な人間のレビューも実験の中心ではない。",
+          "speech": "条件を確認してからだね。論文の実験はパイソンの実装が対象で、採点用テストのフィードバックは渡さない。継続的な人間のレビューも実験の中心ではない。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "同じモデルでも、実行ソフトで結果が変わりそうだね。",
+          "speech": "同じモデルでも、実行ソフトで結果が変わりそうだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。モデルとハーネスを組み合わせたシステムの評価なんだ。推論設定、バージョン、指示、実行回数などを無視して、モデルだけの順位と扱わない。",
+          "speech": "その通り。モデルとハーネスを組み合わせたシステムの評価なんだ。推論設定、バージョン、指示、実行回数などを無視して、モデルだけの順位と扱わない。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "条件を詳しく見るからこそ、実務に持ち帰れるんだね。",
+          "speech": "条件を詳しく見るからこそ、実務に持ち帰れるんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。この研究は重要な失敗の形を可視化した。一方で、普段の開発が必ず同じ割合で失敗するとも、どんな運用でも改善できないとも結論づけないよ。",
+          "speech": "うん。この研究は重要な失敗の形を可視化した。一方で、普段の開発が必ず同じ割合で失敗するとも、どんな運用でも改善できないとも結論づけないよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "11 公開実装を追う",
+      "heading": "問題定義と実行基盤が分かれている",
+      "pause": 0.8,
+      "board": {
+        "layout": "flow",
+        "nodes": [
+          {
+            "label": "scb-problems：仕様・テスト",
+            "detail": ""
+          },
+          {
+            "label": "slop-code-bench：実行・集計",
+            "detail": ""
+          },
+          {
+            "label": "scb-check：品質スコア",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "steps",
+        "nodes": [
+          "scb-problems：仕様・テスト",
+          "slop-code-bench：実行・集計",
+          "scb-check：品質スコア"
+        ],
+        "footer": "調査コミットを固定した静的確認",
+        "intent": "問題定義と実行基盤が分かれている",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "調査コミットを固定した静的確認",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S4",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        },
+        {
+          "url": "https://github.com/SprocketLab/slop-code-bench/blob/06b5c0687d4c05ee502e9696a4d0c22fc1eec5e0/README.md",
+          "note": "現在の実装の静的確認。論文実験時の版とは区別。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "公開コードでは、どのファイルを見ればよいの？",
+          "speech": "公開コードでは、どのファイルを見ればよいの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "現在は問題定義が別のscb-problemsリポジトリへ分かれている。実行や集計はslop-code-bench、品質スコアの計算はscb-checkという分担だよ。",
+          "speech": "現在は問題定義が別のエスシービー、プロブレムズリポジトリへ分かれている。実行や集計はスロップコードベンチ、品質スコアの計算はエスシービー、チェックという分担だよ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "READMEだけでは、全体を見落としそうだね。",
+          "speech": "リードミーだけでは、全体を見落としそうだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。今回は両リポジトリのコミットを固定した。論文当時のコードと現在のmainが同じとは限らないので、現在の実装として出典を付けて説明する。",
+          "speech": "そう。今回は両リポジトリのコミットを固定した。論文当時のコードと現在のメインが同じとは限らないので、現在の実装として出典を付けて説明する。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "実装の成功判定が、論文のStrictと同じかも調べるんだね。",
+          "speech": "実装の成功判定が、論文のストリクトと同じかも調べるんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。実装には用途ごとの判定ポリシーがある。内部の関数名だけで論文の指標へ対応付けず、どのテストを数える処理かまで追うことが大切だよ。",
+          "speech": "その通り。実装には用途ごとの判定ポリシーがある。内部の関数名だけで論文の指標へ対応付けず、どのテストを数える処理かまで追うことが大切だよ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "11 公開実装を追う",
+      "heading": "仕様・テスト・出力のつながり",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "checkpoint_3.md",
+            "detail": ""
+          },
+          {
+            "label": "外部CLIを実行",
+            "detail": ""
+          },
+          {
+            "label": "JSONLの位置と値を検査",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "boundary",
+        "nodes": [
+          "checkpoint_3.md",
+          "外部CLIを実行",
+          "JSONLの位置と値を検査"
+        ],
+        "footer": "code_searchの公開ファイルを静的確認",
+        "intent": "仕様・テスト・出力のつながり",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "code_searchの公開ファイルを静的確認",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S4",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        },
+        {
+          "url": "https://github.com/SprocketLab/slop-code-bench/blob/06b5c0687d4c05ee502e9696a4d0c22fc1eec5e0/README.md",
+          "note": "現在の実装の静的確認。論文実験時の版とは区別。"
+        },
+        {
+          "url": "https://github.com/gabeorlanski/scb-problems/blob/ef6a9dd13911566b6b01075ca121758c9f7b5c5f/code_search/checkpoint_3.md",
+          "note": "問題仕様の進化を確認。独自例を公式解答として示さない。"
+        },
+        {
+          "url": "https://github.com/gabeorlanski/scb-problems/blob/ef6a9dd13911566b6b01075ca121758c9f7b5c5f/code_search/tests/test_checkpoint_3.py#L23",
+          "note": "外部コマンドの出力とcaptureの比較を静的確認"
+        }
+      ],
+      "narration": [
+        {
+          "text": "第三段階の構造検索は、どうテストしていたの？",
+          "speech": "第三段階の構造検索は、どうテストしていたの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "入力ファイルと規則を作り、外部コマンドとして検索器を走らせる。その標準出力を読み、一致した文字列、開始と終了の位置、取得した値を比較している。",
+          "speech": "入力ファイルと規則を作り、外部コマンドとして検索器を走らせる。その標準出力を読み、一致した文字列、開始と終了の位置、取得したあたいを比較している。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "公開されているのに、隠されたテストと呼ぶのはなぜ？",
+          "speech": "公開されているのに、隠されたテストと呼ぶのはなぜ？",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "公開後に研究者が読むことと、評価中のエージェントに見せることは別だよ。今回の動画制作では実装を理解するために読んだが、これで評価実行をしたわけではない。",
+          "speech": "公開後に研究者が読むことと、評価中のエージェントに見せることは別だよ。今回の動画制作では実装を理解するために読んだが、これで評価実行をしたわけではない。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "先にテストを見た実行を、公式条件の成績と呼べないね。",
+          "speech": "先にテストを見た実行を、公式条件の成績と呼べないね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。説明のための閲覧、ローカルな動作確認、正式なベンチマーク実行を区別する。再現するときは入力、隔離、採点結果の扱いまで合わせる必要がある。",
+          "speech": "その通り。説明のための閲覧、ローカルな動作確認、正式なベンチマーク実行を区別する。再現するときは入力、隔離、採点結果の扱いまで合わせる必要がある。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "11 公開実装を追う",
+      "heading": "品質測定ツールの版も固定する",
+      "pause": 0.8,
+      "board": {
+        "layout": "flow",
+        "nodes": [
+          {
+            "label": "成果物のsnapshot",
+            "detail": ""
+          },
+          {
+            "label": "scb-check 0.1.3",
+            "detail": ""
+          },
+          {
+            "label": "JSONの指標を集計",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "steps",
+        "nodes": [
+          "成果物のsnapshot",
+          "scb-check 0.1.3",
+          "JSONの指標を集計"
+        ],
+        "footer": "metrics/checkpoint/driver.py",
+        "intent": "品質測定ツールの版も固定する",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "metrics/checkpoint/driver.py",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S4",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        },
+        {
+          "url": "https://github.com/SprocketLab/slop-code-bench/blob/06b5c0687d4c05ee502e9696a4d0c22fc1eec5e0/src/slop_code/metrics/checkpoint/driver.py",
+          "note": "現在の実装の静的確認。論文実験時の版とは区別。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "測定ツールの更新で、同じコードの値が変わるの？",
+          "speech": "測定ツールの更新で、同じコードのあたいが変わるの？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その可能性があるので、現在の実装はscb-checkを0.1.3に固定し、その版をチェックポイントの記録へ残している。ルール集合が変わると比較が難しくなるからだ。",
+          "speech": "その可能性があるので、現在の実装はエスシービー、チェックをゼロ、いち、さんに固定し、その版をチェックポイントの記録へ残している。ルール集合が変わると比較が難しくなるからだ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "成果物へツールを実行し、JSONから値を取り出すんだね。",
+          "speech": "成果物へツールを実行し、ジェイソンからあたいを取り出すんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。失敗した場合の扱いも読む必要がある。該当処理では警告を出し、指標を返せないことがあるので、値の欠落を品質ゼロと読み替えてはいけない。",
+          "speech": "そう。失敗した場合の扱いも読む必要がある。該当処理では警告を出し、指標を返せないことがあるので、あたいの欠落を品質ゼロと読み替えてはいけない。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "採点する道具の版も、実験条件なんだ。",
+          "speech": "採点する道具の版も、実験条件なんだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その通り。今回確認したのは呼び出しと集計の経路だよ。論文の式と、最新版の検出ルールが完全に同じと実証したわけではない。この境界も記録に残そう。",
+          "speech": "その通り。今回確認したのは呼び出しと集計の経路だよ。論文の式と、最新版の検出ルールが完全に同じと実証したわけではない。この境界も記録に残そう。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "12 読み方と実務への接続",
+      "heading": "順位を見る前に、条件をそろえる",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "論文の基本指示",
+            "detail": ""
+          },
+          {
+            "label": "サイトの実行条件",
+            "detail": ""
+          },
+          {
+            "label": "同じ列名でも確認",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "compare",
+        "nodes": [
+          "論文の基本指示",
+          "サイトの実行条件",
+          "同じ列名でも確認"
+        ],
+        "footer": "GPT5.4 ISO：23.5%と25.5%の例",
+        "intent": "順位を見る前に、条件をそろえる",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "GPT5.4 ISO：23.5%と25.5%の例",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S4",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "GPT 5.4のISOが論文23.5、サイト25.5なのはなぜ？",
+          "speech": "ジーピーティー、ご、てん、よんのアイエスオーが論文23.5、サイト25.5なのはなぜ？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "実行条件も確認しよう。論文の基本指示の表は23.5で、介入の表にはanti-slopで25.5という値がある。数字だけで別実験の改善と決めつけないことが大切だ。",
+          "speech": "実行条件も確認しよう。論文の基本指示の表は23.5で、介入の表にはアンチスロップで25.5というあたいがある。数字だけで別実験の改善と決めつけないことが大切だ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "どの実行を代表に選んだかも、確認が必要なんだね。",
+          "speech": "どの実行を代表に選んだかも、確認が必要なんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "そう。論文の表と本文にも、最高COREのモデル名が一致しない箇所がある。この動画では表の値を参照し、不一致を隠して整合しているようには説明しない。",
+          "speech": "そう。論文の表と本文にも、最高コアのモデル名が一致しない箇所がある。この動画では表のあたいを参照し、不一致を隠して整合しているようには説明しない。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "列、分母、モデル、指示、版をセットで残すわけだ。",
+          "speech": "列、分母、モデル、指示、版をセットで残すわけだ。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "その習慣があれば、ランキングの印象だけで判断しにくくなる。日付付きのスナップショットと固定された出典を持つことは、研究を読むための基本動作なんだ。",
+          "speech": "その習慣があれば、ランキングの印象だけで判断しにくくなる。日付付きのスナップショットと固定された出典を持つことは、研究を読むための基本動作なんだ。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "12 読み方と実務への接続",
+      "heading": "自分の開発で試すなら",
+      "pause": 0.8,
+      "board": {
+        "layout": "flow",
+        "nodes": [
+          {
+            "label": "変更前を保存",
+            "detail": ""
+          },
+          {
+            "label": "機能と構造を別々に検査",
+            "detail": ""
+          },
+          {
+            "label": "必要な箇所を修正して再確認",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "steps",
+        "nodes": [
+          "変更前を保存",
+          "機能と構造を別々に検査",
+          "必要な箇所を修正して再確認"
+        ],
+        "footer": "実務への提案：本研究で効果を実証した手法ではない",
+        "intent": "自分の開発で試すなら",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "実務への提案：本研究で効果を実証した手法ではない",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S4",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "この研究を、自分の開発へどう活かせると思う？",
+          "speech": "この研究を、自分の開発へどう活かせると思う？",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "提案としては、機能の変更ごとにテスト結果だけでなく、大きくなった関数や増えた重複も確認する。変更前の状態を残し、原因を追えるようにすることだね。",
+          "speech": "提案としては、機能の変更ごとにテスト結果だけでなく、大きくなった関数や増えた重複も確認する。変更前の状態を残し、原因を追えるようにすることだね。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "点数だけでなく、増えた処理の意味を読むんだね。",
+          "speech": "点数だけでなく、増えた処理の意味を読むんだね。",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "うん。修正したら機能の回帰も検査する。数値だけを目的に分割したり、必要な検査を消したりしない。この運用の効果は、自分の条件で測っていく必要がある。",
+          "speech": "うん。修正したら機能の回帰も検査する。数値だけを目的に分割したり、必要な検査を消したりしない。この運用の効果は、自分の条件で測っていく必要がある。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "一度の指示より、途中で観測する仕組みを作るんだね。",
+          "speech": "一度の指示より、途中で観測する仕組みを作るんだね。",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "これは論文から得た着想で、SlopCodeBenchで劣化を止めたと証明された手法ではない。仮説と検証を分けて、小さな変更から比較するのがよいだろうね。",
+          "speech": "これは論文から得た着想で、スロップコードベンチで劣化を止めたと証明された手法ではない。仮説と検証を分けて、小さな変更から比較するのがよいだろうね。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    },
+    {
+      "chapter": "12 読み方と実務への接続",
+      "heading": "3つの問いで振り返る",
+      "pause": 0.8,
+      "board": {
+        "layout": "comparison",
+        "nodes": [
+          {
+            "label": "引き継ぐのは何？",
+            "detail": ""
+          },
+          {
+            "label": "侵食0.8の意味は？",
+            "detail": ""
+          },
+          {
+            "label": "指示の効果はゼロ？",
+            "detail": ""
+          }
+        ]
+      },
+      "motion": {
+        "kind": "quiz",
+        "nodes": [
+          "引き継ぐのは何？",
+          "侵食0.8の意味は？",
+          "指示の効果はゼロ？"
+        ],
+        "footer": "自分の言葉で説明できるか",
+        "intent": "3つの問いで振り返る",
+        "before": "前提と比較対象を表示",
+        "operation": "セリフ開始に同期して対象を分類・接続・比較する",
+        "after": "自分の言葉で説明できるか",
+        "invariant": "比較対象の名前と色を維持する"
+      },
+      "sources": [
+        {
+          "url": "https://arxiv.org/html/2603.24755v2#S4",
+          "note": "論文v2。図は特記した報告値を除き独自の模式図。"
+        }
+      ],
+      "narration": [
+        {
+          "text": "第一問。次の段階へ持ち越す中心は、会話履歴だったかな。",
+          "speech": "第一問。次の段階へ持ち越す中心は、会話履歴だったかな。",
+          "character": "host",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "中心は作業ディレクトリだよ。自分が作ったコードが次の土台になる。初期の判断を模範解答で洗い流さないから、設計の影響を追えるんだ。",
+          "speech": "中心は作業ディレクトリだよ。自分が作ったコードが次の土台になる。初期の判断を模範解答で洗い流さないから、設計の影響を追えるんだ。",
+          "character": "guide",
+          "boardStep": 1,
+          "boardFocus": 1,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "第二問。侵食0.8は、関数の80パーセントが不正解という意味？",
+          "speech": "第二問。侵食0.8は、関数の80パーセントが不正解という意味？",
+          "character": "host",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "違う。高複雑度の関数に全体の複雑度の重みが80パーセント集まるという意味だ。テストの不合格率でも、行数そのものの割合でもないよ。",
+          "speech": "違う。高複雑度の関数に全体の複雑度の重みが80パーセント集まるという意味だ。テストの不合格率でも、ぎょうすうそのものの割合でもないよ。",
+          "character": "guide",
+          "boardStep": 2,
+          "boardFocus": 2,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "第三問。プロンプトには効果がないと証明した研究だった？",
+          "speech": "第三問。プロンプトには効果がないと証明した研究だった？",
+          "character": "host",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.45,
+            "expression": "thinking",
+            "pose": "normal",
+            "source": "manual"
+          }
+        },
+        {
+          "text": "初期品質の改善や個別の例外はある。正しさ、構造、費用を分けて追い、条件と限界を残して判断する。それがSlopCodeBenchから持ち帰りたい視点だね。",
+          "speech": "初期品質の改善や個別の例外はある。正しさ、構造、費用を分けて追い、条件と限界を残して判断する。それがスロップコードベンチから持ち帰りたい視点だね。",
+          "character": "guide",
+          "boardStep": 3,
+          "boardFocus": 3,
+          "direction": {
+            "speed": 1,
+            "pause": 0.25,
+            "expression": "normal",
+            "pose": "normal",
+            "source": "manual"
+          }
+        }
+      ]
+    }
+  ],
+  "repositories": [
+    {
+      "url": "https://github.com/SprocketLab/slop-code-bench",
+      "commit": "06b5c0687d4c05ee502e9696a4d0c22fc1eec5e0",
+      "kind": "静的解析",
+      "checkedAt": "2026-09-12"
+    },
+    {
+      "url": "https://github.com/gabeorlanski/scb-problems",
+      "commit": "ef6a9dd13911566b6b01075ca121758c9f7b5c5f",
+      "kind": "静的解析",
+      "checkedAt": "2026-09-12"
+    }
+  ]
+}
