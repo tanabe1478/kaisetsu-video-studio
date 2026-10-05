@@ -1,0 +1,86 @@
+{
+  "title": "画像アップロード API の処理",
+  "meta": ["架空のサンプル", "3D 図解（Blender）"],
+  "lead": "架空の画像アップロード API を題材に、3D 図解の 3 種類（処理の流れの動画、2 列の比較、箱と矢印の配置）を確認するためのサンプル。実在のサービスの仕様ではない。",
+  "figures": [
+    {
+      "id": "flow",
+      "kind": "pipeline",
+      "title": "処理の流れと失敗する地点",
+      "heading": "画像アップロード API（架空のサンプル）",
+      "caption": "3 つのリクエストを順に流す。正常系、未対応の形式（② で 415）、キュー停止中（④ で 503）。",
+      "stations": [
+        {"title": "Controller", "sub": "POST /images", "tone": "blue"},
+        {"title": "① 認可", "sub": "UploadPolicy\n#check", "tone": "teal", "error": {"code": "403", "label": "権限なし"}},
+        {"title": "② 形式の検証", "sub": "ImageFile\n.of", "tone": "amber", "error": {"code": "415", "label": "未対応の形式"}},
+        {"title": "③ 保存", "sub": "ObjectStorage\n#put", "tone": "purple", "error": {"code": "409", "label": "同名のファイル"}},
+        {"title": "④ 通知", "sub": "EventQueue\n#enqueue", "tone": "purple", "error": {"code": "503", "label": "キュー停止中"}},
+        {"title": "201 Created", "sub": "ImageMetadata\nを返す", "tone": "green"}
+      ],
+      "stores": [
+        {"id": "storage", "kind": "records", "at": 3, "title": "ストレージ", "sub": "保存済みの画像"},
+        {"id": "queue", "kind": "topic", "at": 4, "title": "イベントキュー", "sub": "ワーカーが\n縮小画像を作る"}
+      ],
+      "scenarios": [
+        {"caption": "1. 正常系：PNG を送る → 201、縮小画像の生成を依頼", "stopAt": 5, "result": "ok",
+         "effects": [{"at": 3, "record": "storage"}, {"at": 4, "send": "queue"}, {"at": 4, "tag": "ENQUEUED"}]},
+        {"caption": "2. 未対応の形式を送る → ② で 415、ストレージには何も書かれない", "stopAt": 2, "result": "error",
+         "notes": [{"store": "storage", "text": "保存なし", "tone": "red"}]},
+        {"caption": "3. キューが停止中 → ④ で 503、画像は保存されたまま残る", "stopAt": 4, "result": "error",
+         "effects": [{"at": 3, "record": "storage"}, {"at": 4, "tag": "QUEUE_DOWN"}],
+         "notes": [{"store": "storage", "text": "保存は残る", "tone": "purple"}]}
+      ],
+      "body": ["どの工程で失敗したかによって、ストレージに画像が残るかどうかが変わる。形式の検証を保存より前に置いているので、未対応の形式では何も書かれない。"],
+      "points": [
+        {"tag": "確認", "text": "④ で失敗したとき、保存済みの画像を消すか残すか。残すなら再送時の扱いを決めておく。"}
+      ]
+    },
+    {
+      "id": "events",
+      "kind": "columns",
+      "title": "2 つのイベントのキーを揃える",
+      "heading": "同じキューに流れる 2 つのイベント",
+      "subheading": "色付きのキーだけが違う。共通キーは名前も並び順も同じ",
+      "caption": "ImageUploaded と ImageDeleted の payload のキー。",
+      "columns": [
+        {"title": "ImageUploaded", "sub": "既存", "rows": [
+          {"key": "imageId", "row": 0}, {"key": "ownerId", "row": 1},
+          {"key": "contentType", "row": 2, "highlight": true}, {"key": "bytes", "row": 3, "highlight": true},
+          {"key": "storageKey", "row": 4}, {"key": "occurredAt", "row": 5}]},
+        {"title": "ImageDeleted", "sub": "新規", "tone": "teal", "rows": [
+          {"key": "imageId", "row": 0, "value": "\"img_01\""}, {"key": "ownerId", "row": 1, "value": "\"u_42\""},
+          {"key": "reason", "row": 2, "span": 2, "tone": "teal", "sub": "contentType / bytes の代わり"},
+          {"key": "storageKey", "row": 4, "value": "null", "valueTone": "red"}, {"key": "occurredAt", "row": 5, "value": "\"…Z\""}]}
+      ],
+      "notes": [
+        {"column": 0, "row": 2, "span": 2, "text": "アップロード固有", "side": "left", "tone": "amber", "textTone": "amber"},
+        {"column": 1, "row": 4, "text": "削除済みなら null", "side": "right", "tone": "red"}
+      ],
+      "sink": {"title": "イベントキュー", "tone": "pink"},
+      "footnote": "値は例",
+      "body": ["受け取る側がイベントの種類ごとに別のパーサーを書かずに済むよう、共通のキーの名前と順序を揃えている。"]
+    },
+    {
+      "id": "rule",
+      "kind": "board",
+      "title": "サイズ上限の判定をドメインに寄せる",
+      "heading": "サイズ上限の判定を ImageFile に集約",
+      "subheading": "Controller の if 文を値オブジェクトへ移し、ほかの入口からも同じ判定を使う",
+      "caption": "判定の移動元と、新しく判定を使う箇所。",
+      "items": [
+        {"type": "panel", "x": -9.5, "y": 5.0, "w": 7.6, "d": 4.0, "label": "presentation", "mono": true},
+        {"type": "tile", "x": -9.5, "y": 4.6, "w": 5.6, "d": 1.6, "label": "if (bytes > LIMIT)", "tone": "ghost", "ink": "muted", "sub": "削除（ImageFile へ移動）", "alpha": 0.7},
+        {"type": "panel", "x": -1.0, "y": 0.0, "w": 8.4, "d": 5.2, "tone": "#F3E6CF", "label": "domain", "labelTone": "amber", "mono": true},
+        {"type": "tile", "x": -1.0, "y": -0.2, "w": 6.4, "d": 2.4, "h": 1.1, "label": "ImageFile.of", "tone": "amber", "size": 0.56, "sub": "上限 20MB を超えると例外"},
+        {"type": "arrow", "from": [-9.5, 3.4], "to": [-4.0, 1.4], "tone": "amber", "width": 0.14, "head": 0.45},
+        {"type": "text", "x": 5.6, "y": 6.5, "text": "判定を使う入口", "size": 0.4, "tone": "muted"},
+        {"type": "tile", "x": 9.0, "y": 5.2, "w": 7.4, "label": "UploadController", "size": 0.36},
+        {"type": "tile", "x": 9.0, "y": 3.75, "w": 7.4, "label": "ImportBatchJob", "size": 0.36, "tone": "teal"},
+        {"type": "tile", "x": 9.0, "y": 2.3, "w": 7.4, "label": "ReplaceImageUseCase", "size": 0.36, "tone": "teal"},
+        {"type": "arrow", "from": [5.1, 3.7], "to": [2.4, 0.6], "tone": "muted", "width": 0.12, "head": 0.4},
+        {"type": "text", "x": -1.0, "y": -4.4, "text": "緑の 2 つが、今回ほかの入口から増えた呼び出し", "size": 0.4, "tone": "teal", "align": "CENTER"}
+      ],
+      "body": ["判定を値オブジェクトに置くと、バッチや別の UseCase から画像を受け取るときにも同じ上限が効く。"]
+    }
+  ]
+}

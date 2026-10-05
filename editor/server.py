@@ -207,12 +207,10 @@ class Handler(BaseHTTPRequestHandler):
             if path in ('/api/brief','/api/brief/export'):
                 b=brief.validate(data['brief'])
                 with LOCK:
-                    folder=STORE/'briefs';folder.mkdir(parents=True,exist_ok=True)
                     if path=='/api/brief':
-                        tmp=folder/'draft.tmp';tmp.write_bytes(encoded(b));os.replace(tmp,folder/'draft.json')
+                        brief.save_draft(b,STORE/'briefs')
                         return self.send(200,{'saved':True})
-                    prompt=brief.prompt(b);dest=folder/uid();dest.mkdir()
-                    (dest/'brief.json').write_bytes(encoded(b));(dest/'prompt.md').write_text(prompt,encoding='utf-8')
+                    prompt,dest=brief.save_snapshot(b,STORE/'briefs')
                     return self.send(200,{'prompt':prompt,'directory':str(dest)})
             if path=='/api/board-preview':
                 p=validate(data['project']);raw=script(p)

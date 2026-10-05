@@ -120,6 +120,19 @@ test('script-only deliverable and explicit outline approval survive reopening',a
  x.click('[data-close="brief-dialog"]');x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
  assert.equal(x.$('[data-brief="deliverable"]').value,'script');assert.equal(x.$('[data-brief="outlineFirst"]').checked,true);
 });
+test('3D diagram mode relabels deliverables, hides voice-only fields and survives reopening',async t=>{
+ const x=await setup(t);x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
+ const labels=()=>[...x.$('[data-brief="deliverable"]').options].map(o=>o.textContent);
+ assert.equal(x.$('#brief-length').hidden,false);
+ x.input('[data-brief="presentationMode"]','diorama','change');x.input('[data-brief="topic"]','変更点');
+ assert.deepEqual(labels(),['3D図解（動画・静止画）と解説ページ','図の定義JSONのみ']);
+ assert.equal(x.$('[data-brief="boardStyle"]').closest('label').hidden,true);assert.equal(x.$('#brief-length').hidden,true);
+ x.click('#brief-generate');await new Promise(r=>setTimeout(r,20));assert.equal(x.state.brief.presentationMode,'diorama');
+ x.click('[data-close="brief-dialog"]');x.click('#open-brief');await new Promise(r=>setTimeout(r,20));
+ assert.equal(x.$('#brief-length').hidden,true);assert.equal(labels()[0],'3D図解（動画・静止画）と解説ページ');
+ x.input('[data-brief="presentationMode"]','solo','change');
+ assert.equal(x.$('#brief-length').hidden,false);assert.equal(labels()[0],'音声付き本編動画と台本JSON');
+});
 test('target duration is saved and included in revision handoff',async t=>{
  const x=await setup(t);x.click('[data-select-project]');x.input('[data-field="project-targetMinutes"]','5');await x.flush();
  await new Promise(r=>setTimeout(r,450));assert.match(x.$('#duration-detail').textContent,/12分05秒/);

@@ -1,5 +1,14 @@
 # 更新履歴
 
+## 2026-10-05 — 3D図解と解説ページ、ブリーフのインタビュー
+
+- 解説形式に「3D図解と解説ページ（Blender）」を追加。キャラクターと音声を使わず、図の定義JSONからBlenderで処理の流れの動画（pipeline）、2列の比較（columns）、箱と矢印の配置（board）を描き、解説ページにまとめる。`python diorama.py <定義> --output <出力先>`。[docs/DIORAMA.md](docs/DIORAMA.md)、[架空のサンプル](lessons/diorama-sample/spec.json)。
+- 描画後に画像の寸法、動画の全編デコード・フレーム数・解像度、ページの参照を検証し、通ったときだけ`delivery.json`を保存する。図の意味と文字の重なりは目視で確認する。
+- 制作ブリーフで3D図解を選ぶと、成果物の表記を変え、黒板と動画の長さの欄を隠す。依頼文から音声・黒板の指示を外す。
+- Claude Code向けに、AskUserQuestionで制作ブリーフを聞き取るSkill（brief-interview）を追加。`python editor/brief.py save`でGUIと同じ下書き・スナップショットを保存する。
+- 非公開の題材を置く`private/`をGit管理外にした。
+- Pythonテスト9件（Blender描画を含む）とjsdomテスト1件を追加。サンプルをBlender 5.2.2で描画し、静止画と動画のコマを目視確認した。Windowsでの描画は未確認。
+
 ## 2026-09-08 — 誤読の合成前検査
 
 - 字幕と音声用表記に加え、セリフ全体の確認済みカナ `expectedKana` を保存。VOICEVOXの読みと一致しなければ合成を停止する。キャッシュ利用時も照合する。

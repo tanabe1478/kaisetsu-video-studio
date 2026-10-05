@@ -2,6 +2,7 @@ assets/
 .venv/
 cache/
 output/
+private/
 __pycache__/
 _build/
 target/

@@ -82,6 +82,14 @@ FFmpegはimageio-ffmpegに同梱された実行ファイルを使用します。
 
 [MoonBit言語仕様入門](lessons/moonbit/README.md)：32場面・9章。台本、出典、実行できるコード例、検証手順を収録しています。
 
+## 3D図解と解説ページ
+
+キャラクターと音声を使わず、Blenderの3D図解（処理の流れの動画と静止画）と、それをまとめた解説ページを作る形式も選べます。制作ブリーフの解説形式で「3D図解と解説ページ（Blender）」を選ぶか、`python diorama.py <図の定義JSON> --output <出力先>`を実行します。[定義の形式と検証](docs/DIORAMA.md)と[架空のサンプル](lessons/diorama-sample/spec.json)を参照してください。
+
+## 制作ブリーフをインタビューで決める
+
+Claude Codeでは、GUIの制作ブリーフの代わりに、AskUserQuestionで質問に答えながら制作条件を決められます（[brief-interview](.claude/skills/brief-interview/SKILL.md)）。保存先と形式はGUIと同じです。
+
 ## 掛け合い・黒板図解
 
 1人解説／2人の掛け合い、話者ごとの音声・字幕色、セリフに同期した黒板の流れ・比較・関係図に対応しています。霊夢・魔理沙のきつね素材をローカル導入でき、ずんだもんにも同じ図解を使えます。[操作・素材条件・台本形式](docs/DIALOGUE_BOARD.md)を参照してください。

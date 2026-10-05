@@ -1,10 +1,18 @@
-"""Preproduction instructions shared with ChatGPT by the user."""
-import math
+"""Preproduction instructions shared with ChatGPT by the user.
+
+GUIの制作ブリーフと、AskUserQuestionによるインタビュー（brief-interview Skill）の両方から使う。
+python editor/brief.py save < brief.json で、GUIと同じ場所へ下書きとスナップショットを保存する。
+"""
+from pathlib import Path
+import json, math, os, sys, uuid
 
 FIELDS={'topic':'テーマ','repository':'参考URL・リポジトリ','audience':'想定視聴者・前提知識',
         'structure':'希望する構成','focus':'詳しく扱うこと','avoid':'扱わないこと',
         'style':'口調・説明スタイル','instructions':'その他の事前プロンプト',
         'presentationMode':'解説形式','boardStyle':'黒板の図解'}
+MODES={'solo':'1人解説（ずんだもん）','dialogue':'2人の掛け合い','yukkuri':'霊夢・魔理沙の掛け合い',
+       'diorama':'3D図解と解説ページ（Blender・キャラクターなし）'}
+STORE=Path(__file__).resolve().parent/'workspace'/'briefs'
 
 def validate(b):
     if not isinstance(b,dict):raise ValueError('制作条件が不正です。')
@@ -14,18 +22,35 @@ def validate(b):
     if isinstance(n,bool) or not isinstance(n,(float,int)) or not math.isfinite(n) or not 0<=n<=120:raise ValueError('目標時間は0〜120分です。')
     if not isinstance(b.get('outlineFirst',False),bool):raise ValueError('構成案確認の指定が不正です。')
     if b.get('deliverable','video') not in ('video','script'):raise ValueError('成果物は動画または台本を選んでください。')
+    if b.get('presentationMode','') not in ('',*MODES):raise ValueError('解説形式が不正です。')
     return b
+
+def diorama_prompt(b):
+    """3D図解の依頼文。音声・立ち絵・黒板の指示は含めない。"""
+    lines=['次の制作条件で、Blenderの3D図解と解説ページを作りたいです。音声とキャラクターは使いません。']
+    for k,label in FIELDS.items():
+        if k not in ('presentationMode','boardStyle') and b.get(k,'').strip():lines += ['',f'【{label}】',b[k].strip()]
+    pages=b.get('deliverable','video')=='video'
+    lines += ['','【進め方】','最終成果物：処理の流れの動画と静止画の3D図解、それをまとめた解説ページ（index.html）、図の定義JSON。' if pages else '最終成果物：図の定義JSONのみ（描画しない）。']
+    if b.get('outlineFirst',False):lines += ['まず扱う図の一覧と、それぞれで理解させたいことを提案し、私の確認を待ってください。この段階では定義JSONや描画を作らないでください。']
+    lines += ['docs/DIORAMA.mdの形式で図の定義JSONを作り、図の種類（pipeline / columns / board）は説明する内容に合わせて選んでください。']
+    if pages:lines += ['python diorama.py <定義JSON> --output <出力先> で描画し、delivery.jsonの検証が通るまで完了扱いにしないでください。',
+                       '検証とは別に、静止画と動画の重要なコマを自分で見て、文字の重なり・はみ出し・図の意味を確認してください。']
+    lines += ['題材が非公開の情報なら、定義JSONと成果物をGit管理外（private/ または output/）に置いてください。',
+              '既存の定義や成果物は上書きしないでください。']
+    return '\n'.join(lines)
 
 def prompt(b):
     validate(b)
     if not b.get('topic','').strip():raise ValueError('テーマを入力してください。')
+    if b.get('presentationMode')=='diorama':return diorama_prompt(b)
     lines=['次の制作条件で解説動画を作りたいです。','']
     target=b.get('targetMinutes',0)
     lines.append(f'目標時間：{target:g}分（完成尺の目安）' if target else '目標時間：未指定。内容に応じて提案してください。')
     for k,label in FIELDS.items():
         if b.get(k,'').strip():
             value=b[k].strip()
-            if k=='presentationMode':value={'solo':'1人解説（ずんだもん）','dialogue':'2人の掛け合い','yukkuri':'霊夢・魔理沙の掛け合い'}.get(value,value)
+            if k=='presentationMode':value=MODES.get(value,value)
             if k=='boardStyle':value={'none':'使わない','auto':'AIが内容に合わせて図解・アニメーションを設計','flow':'流れ・手順','comparison':'比較','relation':'関係'}.get(value,value)
             lines += ['',f'【{label}】',value]
     if b.get('boardStyle')!='none':
@@ -49,3 +74,20 @@ def prompt(b):
               '掛け合い・黒板の指定はdocs/DIALOGUE_BOARD.mdの形式で保存してください。話者ごとの音声・画像、セリフごとの図の表示数・強調を設定し、音声の種類も明記してください。',
               '既存の台本や編集内容は上書きしないでください。']
     return '\n'.join(lines)
+
+def save_draft(b,store=STORE):
+    b=validate(b);store.mkdir(parents=True,exist_ok=True)
+    tmp=store/'draft.tmp';tmp.write_text(json.dumps(b,ensure_ascii=False,indent=2),encoding='utf-8');os.replace(tmp,store/'draft.json')
+
+def save_snapshot(b,store=STORE):
+    """依頼文を作った時点の条件を、ID別のフォルダーに残す。"""
+    text=prompt(b);dest=store/uuid.uuid4().hex;dest.mkdir(parents=True)
+    (dest/'brief.json').write_text(json.dumps(b,ensure_ascii=False,indent=2),encoding='utf-8');(dest/'prompt.md').write_text(text,encoding='utf-8')
+    return text,dest
+
+if __name__=='__main__':
+    if sys.argv[1:]!=['save']:sys.exit('使い方: python editor/brief.py save < brief.json')
+    try:
+        b=json.loads(sys.stdin.read());save_draft(b);text,dest=save_snapshot(b)
+    except (ValueError,json.JSONDecodeError) as exc:sys.exit(str(exc))
+    print(text+'\n\n制作条件の保存先：'+str(dest))
