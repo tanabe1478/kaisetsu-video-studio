@@ -1,0 +1,1308 @@
+{
+  "title": "Pi Durable：落ちても続き、何人でも操縦できるエージェント基盤",
+  "meta": [
+    "earendil-works/pi @ eb326d2",
+    "packages/durable 1.0.4",
+    "3D 図解（Blender）"
+  ],
+  "lead": "Luis Catacora の紹介動画「What is Pi Durable?」（2026-10-05、2分58秒）の 7 章に沿って、Pi Durable の仕組みを図にした。各図の説明は動画の内容を、コミット eb326d2 の `packages/durable` のコードと README で確かめたもの。コードは静的に読んだだけで、実行はしていない。Pi Durable は実験的なパッケージで、API は予告なく変わる。",
+  "figures": [
+    {
+      "id": "why",
+      "kind": "columns",
+      "title": "1. ターミナルの Pi と何が違うのか",
+      "heading": "1 つの端末から、どこでも動くエージェントへ",
+      "subheading": "色付きの行が、常駐するエージェントで新しく必要になる性質",
+      "caption": "左が動画で説明されたターミナルの Pi、右が Pi Durable。",
+      "link": false,
+      "columns": [
+        {
+          "title": "Pi（コーディングエージェント）",
+          "sub": "ターミナルで動く",
+          "tone": "ink",
+          "rows": [
+            {
+              "key": "動く場所",
+              "row": 0,
+              "sub": "自分のターミナル"
+            },
+            {
+              "key": "操作する人",
+              "row": 1,
+              "sub": "1人"
+            },
+            {
+              "key": "プロセスが落ちたら",
+              "row": 2,
+              "sub": "人が「続けて」と指示する"
+            },
+            {
+              "key": "会話の数",
+              "row": 3,
+              "sub": "目の前の1つ"
+            }
+          ]
+        },
+        {
+          "title": "Pi Durable",
+          "sub": "Slack・サーバー・クラウドに常駐",
+          "tone": "teal",
+          "rows": [
+            {
+              "key": "動く場所",
+              "row": 0,
+              "sub": "ストレージを開ける場所ならどこでも",
+              "highlight": true,
+              "tone": "teal"
+            },
+            {
+              "key": "操作する人",
+              "row": 1,
+              "sub": "何人でも同時に接続して操縦",
+              "highlight": true,
+              "tone": "teal"
+            },
+            {
+              "key": "プロセスが落ちたら",
+              "row": 2,
+              "sub": "最後のチェックポイントから自動で再開",
+              "highlight": true,
+              "tone": "teal"
+            },
+            {
+              "key": "会話の数",
+              "row": 3,
+              "sub": "1つのハーネスで多数を並行",
+              "highlight": true,
+              "tone": "teal"
+            }
+          ]
+        }
+      ],
+      "footnote": "左列は動画の説明による",
+      "body": [
+        "ターミナルの Pi は、1人が目の前で操作する前提なので、プロセスが落ちても人が「続けて」と頼めば済む。Slack やサーバーに常駐するエージェントには見ている人がいないこともあり、障害から自分で立ち直り、複数の人が同時に指示を出せる必要がある。",
+        "Pi Durable はこの要件のための土台で、README は自身を durable agent harness（耐久性のあるエージェント実行基盤）と呼ぶ。会話、モデルのターン、ツール呼び出し、アプリの状態を、画面に出す前にすべてストレージへコミットする。"
+      ],
+      "points": [
+        {
+          "tag": "コード",
+          "text": "仕様書 `docs/spec.md` の中心となる規則は「コミット済みの状態だけが観測できる」。途中経過も含めて、見えているものはすべて保存済みになる。"
+        }
+      ]
+    },
+    {
+      "id": "harness",
+      "kind": "board",
+      "title": "2. ハーネスの構造：すべてがタスク",
+      "heading": "ハーネス＝ストレージ＋会話を並行に動かす仕組み",
+      "subheading": "会話がツールを呼び、ツールは実行環境で動く。黄色の箱はどれもタスク",
+      "caption": "3 つの会話が、それぞれ別の実行環境でツールを動かしている。結果はすべて同じストレージへコミットされる。",
+      "items": [
+        {
+          "type": "panel",
+          "x": 2.6,
+          "y": 0.9,
+          "w": 25.0,
+          "d": 12.4,
+          "label": "Harness.open(storage, { models, registry, env })",
+          "mono": true
+        },
+        {
+          "type": "text",
+          "x": -14.9,
+          "y": 4.9,
+          "text": "会話",
+          "size": 0.36,
+          "tone": "muted"
+        },
+        {
+          "type": "tile",
+          "x": -6.0,
+          "y": 4.9,
+          "w": 7.0,
+          "d": 1.6,
+          "label": "会話 1",
+          "sub": "pi.generation（モデル呼び出し）",
+          "tone": "amber",
+          "size": 0.42
+        },
+        {
+          "type": "tile",
+          "x": 2.6,
+          "y": 4.9,
+          "w": 7.0,
+          "d": 1.6,
+          "label": "会話 2",
+          "sub": "pi.generation",
+          "tone": "amber",
+          "size": 0.42
+        },
+        {
+          "type": "tile",
+          "x": 11.2,
+          "y": 4.9,
+          "w": 7.0,
+          "d": 1.6,
+          "label": "会話 3",
+          "sub": "pi.generation",
+          "tone": "amber",
+          "size": 0.42
+        },
+        {
+          "type": "arrow",
+          "from": [
+            -6.0,
+            3.9
+          ],
+          "to": [
+            -6.0,
+            2.7
+          ]
+        },
+        {
+          "type": "arrow",
+          "from": [
+            2.6,
+            3.9
+          ],
+          "to": [
+            2.6,
+            2.7
+          ]
+        },
+        {
+          "type": "arrow",
+          "from": [
+            11.2,
+            3.9
+          ],
+          "to": [
+            11.2,
+            2.7
+          ]
+        },
+        {
+          "type": "text",
+          "x": -14.9,
+          "y": 1.9,
+          "text": "ツール呼び出し",
+          "size": 0.36,
+          "tone": "muted"
+        },
+        {
+          "type": "tile",
+          "x": -6.0,
+          "y": 1.9,
+          "w": 7.0,
+          "d": 1.6,
+          "label": "read・edit・bash",
+          "sub": "pi.tool",
+          "tone": "amber",
+          "size": 0.42
+        },
+        {
+          "type": "tile",
+          "x": 2.6,
+          "y": 1.9,
+          "w": 7.0,
+          "d": 1.6,
+          "label": "search_issues",
+          "sub": "pi.tool",
+          "tone": "amber",
+          "size": 0.42
+        },
+        {
+          "type": "tile",
+          "x": 11.2,
+          "y": 1.9,
+          "w": 7.0,
+          "d": 1.6,
+          "label": "deploy",
+          "sub": "pi.tool",
+          "tone": "amber",
+          "size": 0.42
+        },
+        {
+          "type": "arrow",
+          "from": [
+            -6.0,
+            0.9
+          ],
+          "to": [
+            -6.0,
+            -0.3
+          ]
+        },
+        {
+          "type": "arrow",
+          "from": [
+            2.6,
+            0.9
+          ],
+          "to": [
+            2.6,
+            -0.3
+          ]
+        },
+        {
+          "type": "arrow",
+          "from": [
+            11.2,
+            0.9
+          ],
+          "to": [
+            11.2,
+            -0.3
+          ]
+        },
+        {
+          "type": "text",
+          "x": -14.9,
+          "y": -1.1,
+          "text": "実行環境",
+          "size": 0.36,
+          "tone": "muted"
+        },
+        {
+          "type": "tile",
+          "x": -6.0,
+          "y": -1.1,
+          "w": 7.0,
+          "d": 1.6,
+          "label": "手元の PC",
+          "sub": "NodeExecutionEnv",
+          "tone": "teal",
+          "size": 0.42
+        },
+        {
+          "type": "tile",
+          "x": 2.6,
+          "y": -1.1,
+          "w": 7.0,
+          "d": 1.6,
+          "label": "リモート VM",
+          "sub": "独自の ExecutionEnv",
+          "tone": "teal",
+          "size": 0.42
+        },
+        {
+          "type": "tile",
+          "x": 11.2,
+          "y": -1.1,
+          "w": 7.0,
+          "d": 1.6,
+          "label": "メモリー内サンドボックス",
+          "sub": "独自の ExecutionEnv",
+          "tone": "teal",
+          "size": 0.42
+        },
+        {
+          "type": "tile",
+          "x": 2.6,
+          "y": -4.1,
+          "w": 23.4,
+          "d": 1.7,
+          "h": 0.55,
+          "label": "ストレージ",
+          "sub": "会話記録（entries）・タスク・ドキュメント",
+          "tone": "purple",
+          "size": 0.48
+        },
+        {
+          "type": "text",
+          "x": -14.9,
+          "y": -4.1,
+          "text": "保存先",
+          "size": 0.36,
+          "tone": "muted"
+        },
+        {
+          "type": "text",
+          "x": 0,
+          "y": -6.4,
+          "text": "すべての変更は 1 本のアトミックなコミット列を通る。コミット前の状態は誰にも見えない",
+          "size": 0.36,
+          "tone": "ink",
+          "align": "CENTER"
+        }
+      ],
+      "body": [
+        "ハーネスは 1 つのストレージを開き、その上で多数の会話を動かす。会話はモデルを呼び、モデルが求めたツールを、会話ごとに決めた実行環境（ローカルのディレクトリ、コンテナ、VM など）で動かす。実行環境は `env` 関数で会話ごとに作り分けられる。",
+        "モデルの呼び出しは `pi.generation`、ツールの実行は `pi.tool` という組み込みのタスクになる。タスクは各段階でチェックポイントを保存する状態機械で、必ず所有者（会話か、別のタスク）を持つ。生成タスクは自分のツール呼び出しのタスクを所有し、それらが終わるのを待ってから次の生成へ引き継ぐ。"
+      ],
+      "points": [
+        {
+          "tag": "コード",
+          "text": "1 回の入力は「`pi.user` → `pi.generation` → `pi.tool` × n → `pi.tool-result` × n → `pi.generation` → `pi.assistant`」の順に記録される（README の Concepts）。"
+        }
+      ]
+    },
+    {
+      "id": "storage",
+      "kind": "board",
+      "title": "3. 好きなストレージで動かす",
+      "heading": "メモリーには作業中のデータだけ、残りはストレージ",
+      "subheading": "Storage インターフェースを満たせば保存先を差し替えられる",
+      "caption": "左がメモリーに置かれる作業中のデータ、右が同梱のストレージと自作できる保存先。",
+      "items": [
+        {
+          "type": "panel",
+          "x": -9.2,
+          "y": 1.6,
+          "w": 10.6,
+          "d": 8.4,
+          "tone": "#DCEFE9",
+          "label": "メモリー（作業中のデータ）",
+          "labelTone": "teal"
+        },
+        {
+          "type": "tile",
+          "x": -9.2,
+          "y": 3.6,
+          "w": 8.6,
+          "d": 1.5,
+          "label": "実行中の会話の文脈",
+          "tone": "teal",
+          "size": 0.4
+        },
+        {
+          "type": "tile",
+          "x": -9.2,
+          "y": 1.6,
+          "w": 8.6,
+          "d": 1.5,
+          "label": "動いているタスク",
+          "tone": "teal",
+          "size": 0.4
+        },
+        {
+          "type": "tile",
+          "x": -9.2,
+          "y": -0.4,
+          "w": 8.6,
+          "d": 1.5,
+          "label": "処理待ちの投入",
+          "tone": "teal",
+          "size": 0.4
+        },
+        {
+          "type": "text",
+          "x": -9.2,
+          "y": -3.6,
+          "text": "アイドルが続いた会話は",
+          "size": 0.32,
+          "tone": "muted",
+          "align": "CENTER"
+        },
+        {
+          "type": "text",
+          "x": -9.2,
+          "y": -4.3,
+          "text": "contextRetentionMs 後に外れる",
+          "size": 0.32,
+          "tone": "muted",
+          "align": "CENTER"
+        },
+        {
+          "type": "arrow",
+          "from": [
+            -3.6,
+            1.6
+          ],
+          "to": [
+            -2.4,
+            1.6
+          ],
+          "tone": "muted"
+        },
+        {
+          "type": "panel",
+          "x": 6.3,
+          "y": 1.6,
+          "w": 17.0,
+          "d": 8.4,
+          "label": "ストレージ（それ以外のすべて）"
+        },
+        {
+          "type": "tile",
+          "x": 2.2,
+          "y": 3.6,
+          "w": 7.6,
+          "d": 1.7,
+          "label": "Memory",
+          "sub": "同梱・永続化しない",
+          "tone": "blue",
+          "size": 0.44
+        },
+        {
+          "type": "tile",
+          "x": 10.4,
+          "y": 3.6,
+          "w": 7.6,
+          "d": 1.7,
+          "label": "SQLite",
+          "sub": "同梱・1 ファイル（WAL）",
+          "tone": "blue",
+          "size": 0.44
+        },
+        {
+          "type": "tile",
+          "x": 2.2,
+          "y": 1.2,
+          "w": 7.6,
+          "d": 1.7,
+          "label": "JSONL",
+          "sub": "同梱・追記のみのファイル",
+          "tone": "blue",
+          "size": 0.44
+        },
+        {
+          "type": "tile",
+          "x": 10.4,
+          "y": 1.2,
+          "w": 7.6,
+          "d": 1.7,
+          "label": "Durable Object",
+          "sub": "同梱・Cloudflare の SQLite",
+          "tone": "blue",
+          "size": 0.44
+        },
+        {
+          "type": "tile",
+          "x": 6.3,
+          "y": -1.2,
+          "w": 15.8,
+          "d": 1.7,
+          "label": "Postgres・キー・バリュー型ストアなど",
+          "sub": "Storage を実装して自作する（同梱なし）",
+          "tone": "ghost",
+          "ink": "muted",
+          "size": 0.4
+        },
+        {
+          "type": "text",
+          "x": 6.3,
+          "y": -3.6,
+          "text": "自作したものは共通の適合テストで確かめられる",
+          "size": 0.32,
+          "tone": "muted",
+          "align": "CENTER"
+        },
+        {
+          "type": "text",
+          "x": 0,
+          "y": -6.4,
+          "text": "1 つのストレージを開けるのは同時に 1 プロセスだけ（プロセス間のロックはない）",
+          "size": 0.36,
+          "tone": "red",
+          "align": "CENTER"
+        }
+      ],
+      "body": [
+        "ハーネスはストレージの上で開く。`MemoryStorage`、SQLite、JSONL が同梱されており、再起動をまたいで会話を残すなら SQLite か JSONL を使う。SQLite は WAL モードで、プロセスのクラッシュには耐えるが、電源断では最後のコミットを失うことがある（README）。",
+        "メモリーに常駐するのは実行中の会話の文脈、動いているタスク、処理待ちの投入といった作業中のデータだけで、数万件の会話記録も必要なときにストレージから読む。アイドル状態の会話の文脈は、設定 `contextRetentionMs` の時間が過ぎるとメモリーから外れる。"
+      ],
+      "points": [
+        {
+          "tag": "動画との差",
+          "text": "動画は Cloudflare Durable Object を「この上にも作れる」例として挙げるが、コミット eb326d2 では `openDurableObjectSqliteStorage` として同梱されている。Postgres とキー・バリュー型ストアのアダプターはリポジトリにない。"
+        },
+        {
+          "tag": "コード",
+          "text": "自作のストレージは `registerStorageConformance()`（`@earendil-works/pi-durable/testing`）で共通の適合テストにかけられる。"
+        },
+        {
+          "tag": "注意",
+          "text": "プロセス間のロックはないので、同じストレージを 2 つのプロセスで同時に開かないようにする。"
+        }
+      ]
+    },
+    {
+      "id": "recovery",
+      "kind": "pipeline",
+      "title": "4. 各段階でチェックポイントを残す",
+      "heading": "クラッシュしても、最後のチェックポイントから再開する",
+      "caption": "4 つの流れを順に再生する。正常系、再実行しないツール（deploy）の中断、再実行してよいツール、同じリクエスト ID の再送。",
+      "stations": [
+        {
+          "title": "投入",
+          "sub": "submit()",
+          "tone": "blue"
+        },
+        {
+          "title": "① 受け付け",
+          "sub": "requestId\nで照合",
+          "tone": "blue"
+        },
+        {
+          "title": "② モデル",
+          "sub": "pi.generation",
+          "tone": "amber"
+        },
+        {
+          "title": "③ 意図を記録",
+          "sub": "引数と\nreplay の方針",
+          "tone": "purple"
+        },
+        {
+          "title": "④ ツール実行",
+          "sub": "pi.tool\nexecute()",
+          "tone": "amber",
+          "error": {
+            "code": "中断",
+            "label": "interrupted を返す"
+          }
+        },
+        {
+          "title": "⑤ 結果を記録",
+          "sub": "pi.tool-result",
+          "tone": "purple"
+        },
+        {
+          "title": "回答",
+          "sub": "pi.assistant",
+          "tone": "green"
+        }
+      ],
+      "stores": [
+        {
+          "id": "db",
+          "kind": "records",
+          "at": 3,
+          "title": "ストレージ",
+          "sub": "チェックポイント"
+        }
+      ],
+      "scenarios": [
+        {
+          "caption": "1. 正常系：段階ごとに保存してから次へ進む",
+          "stopAt": 6,
+          "result": "ok",
+          "holdFrames": 60,
+          "effects": [
+            {
+              "at": 1,
+              "record": "db"
+            },
+            {
+              "at": 3,
+              "record": "db"
+            },
+            {
+              "at": 5,
+              "record": "db"
+            }
+          ]
+        },
+        {
+          "caption": "2. deploy の途中で落ちる：再実行せず、中断をモデルに伝える",
+          "stopAt": 4,
+          "result": "error",
+          "holdFrames": 70,
+          "effects": [
+            {
+              "at": 1,
+              "record": "db"
+            },
+            {
+              "at": 3,
+              "record": "db"
+            },
+            {
+              "at": 4,
+              "tag": "replay: unsafe",
+              "frames": 50
+            }
+          ],
+          "notes": [
+            {
+              "store": "db",
+              "text": "意図は保存済み",
+              "tone": "ink"
+            }
+          ]
+        },
+        {
+          "caption": "3. replay: \"safe\" のツール：落ちても再起動後に再実行",
+          "stopAt": 6,
+          "result": "ok",
+          "holdFrames": 60,
+          "effects": [
+            {
+              "at": 1,
+              "record": "db"
+            },
+            {
+              "at": 3,
+              "record": "db"
+            },
+            {
+              "at": 4,
+              "tag": "落ちる→再起動→再実行",
+              "frames": 60
+            },
+            {
+              "at": 5,
+              "record": "db"
+            }
+          ]
+        },
+        {
+          "caption": "4. 再起動後に同じ requestId で再送：既存の投入を返す",
+          "stopAt": 1,
+          "result": "ok",
+          "holdFrames": 80,
+          "effects": [
+            {
+              "at": 1,
+              "tag": "同じ ID → 二重投入しない",
+              "frames": 70
+            }
+          ]
+        }
+      ],
+      "posterFrame": 110,
+      "body": [
+        "実行の各段階はタスクで、次へ進む前にチェックポイントをストレージへ保存する。プロセスが落ちたら、新しいプロセスが同じストレージを開いて `harness.resume()` を呼び、各タスクを最後のチェックポイントから続ける。",
+        "ツールのタスクは、実行の前に「最終的な引数」と「再実行してよいか（`replay`）」を意図として保存する。再起動後にこの意図が残っていたら、保存された方針と現在のツール定義の両方が `\"safe\"` のときだけ再実行する。それ以外（既定は `\"unsafe\"`）は再実行せず、「中断され、途中まで実行された可能性がある」というエラー結果をモデルに渡す。",
+        "投入に `requestId` を付けると、同じ ID の再送は新しい投入を作らず、既存の投入を返す。再起動の前後でクライアントが送り直しても、同じ入力が 2 回処理されない。"
+      ],
+      "points": [
+        {
+          "tag": "コード",
+          "text": "`src/harness/tool.ts` の `ToolTask` は `call` 段階で意図をコミットし、復旧時だけ `execute` 段階に入って再実行の可否を判断する。"
+        },
+        {
+          "tag": "注意",
+          "text": "途中の回答文やツールの出力は既定で最大 100 ms ごとにコミットされるので、クラッシュで失うのは最大でその間の分（`settings.progress` で変更できる）。"
+        },
+        {
+          "tag": "設計判断",
+          "text": "デプロイのように副作用のあるツールを `\"safe\"` にすると、再起動のたびに再実行され得る。既定が `\"unsafe\"` なのはこのため。"
+        }
+      ]
+    },
+    {
+      "id": "fork",
+      "kind": "board",
+      "title": "5. フォーク・並行実行・サブエージェント",
+      "heading": "分岐しても履歴はコピーしない。互いを止めない",
+      "subheading": "スレッドもサブエージェントも、同じ「会話」として並行に動く",
+      "caption": "上がルートの会話、中段が途中から分岐したスレッド、下段がツール呼び出しの所有するサブエージェント。",
+      "items": [
+        {
+          "type": "text",
+          "x": -14.6,
+          "y": 5.0,
+          "text": "#channel",
+          "size": 0.46,
+          "tone": "blue",
+          "mono": true
+        },
+        {
+          "type": "text",
+          "x": -14.6,
+          "y": 4.3,
+          "text": "ルートの会話",
+          "size": 0.3,
+          "tone": "muted"
+        },
+        {
+          "type": "tile",
+          "x": -7.6,
+          "y": 4.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "user",
+          "tone": "blue",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": -5.2,
+          "y": 4.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "asst",
+          "tone": "blue",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": -2.8,
+          "y": 4.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "user",
+          "tone": "blue",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": -0.4,
+          "y": 4.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "asst",
+          "tone": "blue",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": 2.0,
+          "y": 4.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "user",
+          "tone": "blue",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": 4.4,
+          "y": 4.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "asst",
+          "tone": "blue",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": 6.8,
+          "y": 4.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "user",
+          "tone": "blue",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": 9.2,
+          "y": 4.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "asst",
+          "tone": "blue",
+          "size": 0.3
+        },
+        {
+          "type": "arrow",
+          "from": [
+            -2.8,
+            4.0
+          ],
+          "to": [
+            -0.6,
+            1.4
+          ],
+          "tone": "purple",
+          "width": 0.12,
+          "head": 0.4
+        },
+        {
+          "type": "text",
+          "x": -9.2,
+          "y": 2.6,
+          "text": "fork(entryId)：その時点までは親の記録を読む",
+          "size": 0.3,
+          "tone": "purple"
+        },
+        {
+          "type": "text",
+          "x": -14.6,
+          "y": 1.0,
+          "text": "スレッド",
+          "size": 0.46,
+          "tone": "purple"
+        },
+        {
+          "type": "text",
+          "x": -14.6,
+          "y": 0.3,
+          "text": "チャンネルからのフォーク",
+          "size": 0.3,
+          "tone": "muted"
+        },
+        {
+          "type": "tile",
+          "x": -0.4,
+          "y": 0.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "user",
+          "tone": "purple",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": 2.0,
+          "y": 0.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "asst",
+          "tone": "purple",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": 4.4,
+          "y": 0.7,
+          "w": 1.9,
+          "d": 1.0,
+          "h": 0.7,
+          "label": "triage",
+          "tone": "amber",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": 6.8,
+          "y": 0.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "asst",
+          "tone": "purple",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": 9.2,
+          "y": 0.7,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "user",
+          "tone": "purple",
+          "size": 0.3
+        },
+        {
+          "type": "text",
+          "x": 3.3,
+          "y": -0.5,
+          "text": "ツール呼び出し",
+          "size": 0.28,
+          "tone": "amber"
+        },
+        {
+          "type": "arrow",
+          "from": [
+            4.4,
+            -0.8
+          ],
+          "to": [
+            6.4,
+            -2.6
+          ],
+          "tone": "amber",
+          "width": 0.12,
+          "head": 0.4
+        },
+        {
+          "type": "text",
+          "x": -14.6,
+          "y": -3.0,
+          "text": "サブエージェント",
+          "size": 0.46,
+          "tone": "amber"
+        },
+        {
+          "type": "text",
+          "x": -14.6,
+          "y": -3.7,
+          "text": "ツール呼び出しが所有する会話",
+          "size": 0.3,
+          "tone": "muted"
+        },
+        {
+          "type": "tile",
+          "x": 6.8,
+          "y": -3.3,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "user",
+          "tone": "amber",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": 9.2,
+          "y": -3.3,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "asst",
+          "tone": "amber",
+          "size": 0.3
+        },
+        {
+          "type": "tile",
+          "x": 11.6,
+          "y": -3.3,
+          "w": 1.9,
+          "d": 1.0,
+          "label": "asst",
+          "tone": "amber",
+          "size": 0.3
+        },
+        {
+          "type": "text",
+          "x": 5.6,
+          "y": -4.6,
+          "text": "独自のモデル・指示。呼び出しが中断されれば子も中断",
+          "size": 0.3,
+          "tone": "amber"
+        },
+        {
+          "type": "text",
+          "x": 0,
+          "y": -6.6,
+          "text": "どの会話も別々に進み、片方の実行がもう片方を待たせない",
+          "size": 0.38,
+          "tone": "ink",
+          "align": "CENTER"
+        }
+      ],
+      "body": [
+        "1 つのハーネスで多数の会話を同時に動かせる。`fork(entryId)` で会話記録の任意の時点から分岐でき、分岐した会話は「自分の記録の後に、分岐点までの親の記録」を読む。履歴はコピーされない（`docs/spec.md` 2.1）。Slack のチャンネルから派生したスレッドのように、どちらも動き続ける。",
+        "サブエージェントもただの会話で、作ったツール呼び出しのタスクが所有者になる。呼び出しが中断・失敗すると子の会話も中断され、親は子がアイドルになるまでアイドルにならない。"
+      ],
+      "points": [
+        {
+          "tag": "コード",
+          "text": "フォークした会話は親の `pi.agent`（モデルや拡張の選択）を分岐時点の値で引き継ぐが、プロバイダー向けのセッション ID は新しく発行される。"
+        },
+        {
+          "tag": "コード",
+          "text": "`background: true` で作ったタスクが所有する子は、親の中断の影響を受けず、親を実行中のままにもしない。常駐型のサブエージェントはこれを使う（例 `23-subagent-background.ts`）。"
+        }
+      ]
+    },
+    {
+      "id": "extensions",
+      "kind": "board",
+      "title": "6. 拡張機能とアプリの状態",
+      "heading": "拡張機能はまとめて差し替え、状態は会話記録と一緒にコミット",
+      "subheading": "コードはレジストリ、保存されるのは名前とデータだけ",
+      "caption": "左が拡張機能の中身、右が 1 回のコミットに入る会話記録とドキュメント、下が裏で動くコンパクション。",
+      "items": [
+        {
+          "type": "panel",
+          "x": -7.6,
+          "y": 3.2,
+          "w": 14.4,
+          "d": 6.8,
+          "tone": "#E7E2F5",
+          "label": "defineExtension()",
+          "labelTone": "purple",
+          "mono": true
+        },
+        {
+          "type": "tile",
+          "x": -11.0,
+          "y": 4.0,
+          "w": 6.0,
+          "d": 1.5,
+          "label": "tools",
+          "sub": "ツール",
+          "tone": "purple",
+          "size": 0.42
+        },
+        {
+          "type": "tile",
+          "x": -4.2,
+          "y": 4.0,
+          "w": 6.0,
+          "d": 1.5,
+          "label": "sections",
+          "sub": "システムプロンプトの部品",
+          "tone": "purple",
+          "size": 0.42
+        },
+        {
+          "type": "tile",
+          "x": -11.0,
+          "y": 2.0,
+          "w": 6.0,
+          "d": 1.5,
+          "label": "hooks",
+          "sub": "組み込みタスクへの介入",
+          "tone": "purple",
+          "size": 0.42
+        },
+        {
+          "type": "tile",
+          "x": -4.2,
+          "y": 2.0,
+          "w": 6.0,
+          "d": 1.5,
+          "label": "tasks",
+          "sub": "独自のタスク",
+          "tone": "purple",
+          "size": 0.42
+        },
+        {
+          "type": "text",
+          "x": -7.6,
+          "y": -1.2,
+          "text": "会話に保存されるのは拡張の名前だけ。",
+          "size": 0.32,
+          "tone": "ink",
+          "align": "CENTER"
+        },
+        {
+          "type": "text",
+          "x": -7.6,
+          "y": -1.9,
+          "text": "同じ名前で install すると、動かしたまま差し替わる",
+          "size": 0.32,
+          "tone": "ink",
+          "align": "CENTER"
+        },
+        {
+          "type": "panel",
+          "x": 7.6,
+          "y": 3.2,
+          "w": 14.4,
+          "d": 6.8,
+          "tone": "#F3E6CF",
+          "label": "1 回のコミット（すべて保存か、何も保存しないか）",
+          "labelTone": "amber"
+        },
+        {
+          "type": "tile",
+          "x": 4.2,
+          "y": 2.9,
+          "w": 6.0,
+          "d": 3.4,
+          "h": 0.6,
+          "label": "会話記録",
+          "sub": "tool: todo「ship v2 を追加」",
+          "tone": "amber",
+          "size": 0.44
+        },
+        {
+          "type": "tile",
+          "x": 11.0,
+          "y": 2.9,
+          "w": 6.0,
+          "d": 3.4,
+          "h": 0.6,
+          "label": "app.todos",
+          "sub": "{ items: [\"ship v2\"] }",
+          "tone": "amber",
+          "size": 0.44
+        },
+        {
+          "type": "text",
+          "x": 7.6,
+          "y": -1.2,
+          "text": "defineDoc() で型付きの JSON ドキュメントを定義する",
+          "size": 0.32,
+          "tone": "ink",
+          "align": "CENTER"
+        },
+        {
+          "type": "tile",
+          "x": 0,
+          "y": -4.4,
+          "w": 29.0,
+          "d": 1.9,
+          "label": "コンパクション：会話を止めずに裏で古い記録を要約し、次のターンの区切りで差し込む",
+          "tone": "ghost",
+          "ink": "ink",
+          "size": 0.38,
+          "mono": false
+        }
+      ],
+      "body": [
+        "拡張機能（Extension）は、ツール、システムプロンプトの部品（section）、フック、ラッパー、タスクをひとまとめにしたもの。プロセスが持つレジストリにインストールし、会話は拡張の名前だけを保存する。同じ名前で `registry.install()` すると、その場で差し替わる。実行中のツール呼び出しは古いコードのまま終わり、次の段階・リクエスト・呼び出しから新しいコードを使う。",
+        "ToDo リストや計画のようなアプリの状態は `defineDoc()` で定義する型付きの JSON ドキュメントに置き、会話記録の追加と同じコミットで書く。片方だけが保存されることはない。",
+        "コンパクション（古い記録を要約して、モデルに見せる量を減らす処理）は会話を止めずに裏で動く。アイドル中ならすぐ、実行中なら次のターンの区切りで要約が差し込まれる。古い記録はストレージに残る。"
+      ],
+      "points": [
+        {
+          "tag": "コード",
+          "text": "再起動後は同じ拡張機能をもう一度インストールする。拡張の `tasks` のうち保留中のものは、インストールされた時点で再開する（README の Reload）。"
+        },
+        {
+          "tag": "注意",
+          "text": "毎回違う値を返す section（現在時刻など）を置くと、変化分だけを送る仕組みが働かず、プロバイダーのプロンプトキャッシュが効きにくくなる。"
+        }
+      ]
+    },
+    {
+      "id": "multiplayer",
+      "kind": "board",
+      "title": "7. マルチプレイヤー",
+      "heading": "全員が同じ会話を見て、誰でも操縦できる",
+      "subheading": "接続時に現在の表示を受け取り、あとは変化分だけを受け取る",
+      "caption": "中央の会話に 3 つのクライアントが接続している。右下は途中から参加したクライアント。",
+      "items": [
+        {
+          "type": "tile",
+          "x": 0,
+          "y": 0.4,
+          "w": 8.0,
+          "d": 4.2,
+          "h": 1.0,
+          "label": "会話（thread）",
+          "sub": "エージェントが実行中",
+          "tone": "amber",
+          "size": 0.56,
+          "mono": false
+        },
+        {
+          "type": "tile",
+          "x": -10.4,
+          "y": 4.8,
+          "w": 6.6,
+          "d": 1.8,
+          "label": "Slack ボット",
+          "sub": "接続中",
+          "tone": "blue",
+          "size": 0.44,
+          "mono": false
+        },
+        {
+          "type": "tile",
+          "x": 10.4,
+          "y": 4.8,
+          "w": 6.6,
+          "d": 1.8,
+          "label": "Web UI",
+          "sub": "接続中",
+          "tone": "blue",
+          "size": 0.44,
+          "mono": false
+        },
+        {
+          "type": "tile",
+          "x": -10.4,
+          "y": -4.0,
+          "w": 6.6,
+          "d": 1.8,
+          "label": "ターミナル",
+          "sub": "接続中",
+          "tone": "blue",
+          "size": 0.44,
+          "mono": false
+        },
+        {
+          "type": "tile",
+          "x": 10.4,
+          "y": -4.0,
+          "w": 6.6,
+          "d": 1.8,
+          "label": "途中参加",
+          "sub": "現在の表示から始める",
+          "tone": "teal",
+          "size": 0.44,
+          "mono": false
+        },
+        {
+          "type": "arrow",
+          "from": [
+            -4.1,
+            2.1
+          ],
+          "to": [
+            -7.0,
+            3.8
+          ],
+          "tone": "blue"
+        },
+        {
+          "type": "arrow",
+          "from": [
+            4.1,
+            2.1
+          ],
+          "to": [
+            7.0,
+            3.8
+          ],
+          "tone": "blue"
+        },
+        {
+          "type": "arrow",
+          "from": [
+            -4.1,
+            -1.3
+          ],
+          "to": [
+            -7.0,
+            -3.0
+          ],
+          "tone": "blue"
+        },
+        {
+          "type": "arrow",
+          "from": [
+            4.1,
+            -1.3
+          ],
+          "to": [
+            7.0,
+            -3.0
+          ],
+          "tone": "teal"
+        },
+        {
+          "type": "text",
+          "x": 0,
+          "y": 5.4,
+          "text": "watch()：コミットごとの変化分を配る",
+          "size": 0.34,
+          "tone": "blue",
+          "align": "CENTER"
+        },
+        {
+          "type": "arrow",
+          "from": [
+            -7.0,
+            -4.7
+          ],
+          "to": [
+            -1.8,
+            -1.9
+          ],
+          "tone": "red",
+          "width": 0.12,
+          "head": 0.4
+        },
+        {
+          "type": "text",
+          "x": -6.6,
+          "y": -6.4,
+          "text": "steer：実行中に指示を足す",
+          "size": 0.34,
+          "tone": "red"
+        },
+        {
+          "type": "text",
+          "x": 4.0,
+          "y": -6.4,
+          "text": "遅れが 100 フレームを超えたら最新の表示 1 つにまとめる",
+          "size": 0.3,
+          "tone": "muted"
+        }
+      ],
+      "body": [
+        "同じ会話にいくつでもクライアントを接続できる。`watch()` は接続時点の表示を渡し、その後はコミットごとの変化分（Chord の操作）だけを 1 回ずつ届ける。途中参加や再接続は現在の表示から始まり、過去の変化は再送されない。",
+        "実行中の会話に入力を投入すると受信箱（`pi.inbox`）に入る。`whenBusy: \"steer\"` はいまのツールの区切りの後に差し込まれて実行中の作業に加わり、既定の follow-up は回答の後に次の実行を始める。",
+        "Pi Durable は MIT ライセンスで、npm から `@earendil-works/pi-durable`、`@earendil-works/pi-ai`、`@earendil-works/chord` をインストールして使う。実験的なので API は変わり得る。"
+      ],
+      "points": [
+        {
+          "tag": "コード",
+          "text": "配信が追いつかないクライアントには未配信のフレームが最大 100 個たまり、それを超えると最新の表示 1 つに置き換えられる（`src/session/observation.ts` の `MAX_PENDING_WATCH_FRAMES`）。"
+        },
+        {
+          "tag": "動画との差",
+          "text": "動画は「TypeScript で約 1 万 5000 行」とする。コミット eb326d2 の `packages/durable/src` を `wc -l` で数えると、テスト用の `src/testing` を除いて 17,594 行、含めると 20,404 行（空行・コメントを含む）。動画の数え方は未確認。"
+        }
+      ]
+    }
+  ]
+}
